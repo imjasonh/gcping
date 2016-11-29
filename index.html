@@ -3,10 +3,13 @@
 <head>
   <meta charset="utf-8">
   <title>GCP ping</title>
-  <link href='https://fonts.googleapis.com/css?family=Oxygen:700' rel='stylesheet' type='text/css'>
 <style>
 body, input {
-  font-family: 'Oxygen', sans-serif;
+  font-family: 'Arial', sans-serif;
+}
+
+h1, h3 {
+  text-align: center;
 }
 
 #container {
@@ -27,6 +30,10 @@ td.result {
 
 table, td {
   border: 1px solid black;
+}
+
+table {
+  width: 100%;
 }
 
 tr#allrow td {
@@ -76,6 +83,9 @@ tr#allrow td {
     </tr>
     <tr id="allrow"><td /><td /><td id="allcell"><button id="all">All regions</button></td></tr>
   </table>
+  
+  <h3>How it works</h3>
+  <p>A small object is fetched from a Google Cloud Storage bucket in each region, and the time between request and response is shown. The object is requested five times without caching and the average is shown.</p>
   </div>
 </body>
 <script type="text/javascript">

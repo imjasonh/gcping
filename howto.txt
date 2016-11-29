@@ -1,0 +1,28 @@
+PROJECT_ID=gcping-1369
+SITE=www.gcping.com
+
+# Create buckets in each region/multiregion
+gsutil mb -c regional -l us-central1 gs://$PROJECT-us-central1
+gsutil mb -c regional -l us-east1 gs://$PROJECT-us-east1
+gsutil mb -c regional -l asia-east1 gs://$PROJECT-asia-east1
+gsutil mb -c regional -l asia-northeast1 gs://$PROJECT-asia-northeast1
+gsutil mb -c regional -l europe-west1 gs://$PROJECT-europe-west1
+
+# Set defacl public-read on buckets
+gsutil ls -p $PROJECT_ID | xargs gsutil defacl set public-read
+
+# Set CORS on buckets
+gsutil ls -p $PROJECT_ID | xargs gsutil cors set cors.json
+
+# Copy ping object to buckets, with no-cache headers
+cat "pong" > ping
+gsutil ls -p $PROJECT_ID | xargs gsutil cp -h "Cache-Control:no-cache" ping
+
+
+
+
+# Set up static site
+gsutil mb gs://$SITE
+gsutil defacl set public-read gs://$SITE
+gsutil cp index.html gs://$SITE
+gsutil web set -m index.html gs://$SITE

@@ -15,10 +15,9 @@ gsutil ls -p $PROJECT_ID | xargs gsutil defacl set public-read
 gsutil ls -p $PROJECT_ID | xargs gsutil cors set cors.json
 
 # Copy ping object to buckets, with no-cache headers
-cat "pong" > ping
-gsutil ls -p $PROJECT_ID | xargs gsutil cp -h "Cache-Control:no-cache" ping
-
-
+echo "pong" > ping
+gsutil ls -p $PROJECT_ID | xargs -I{} gsutil -h "Cache-Control:no-store" cp ping {}
+rm ping
 
 
 # Set up static site

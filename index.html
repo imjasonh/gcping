@@ -85,9 +85,6 @@ tr#lastrow td {
   
   <h3>How does this work?</h3>
   <p>A small object is repeatedly fetched from a Google Cloud Storage bucket in each region, and the average time between request and response is shown.</p>
-	
-	<h3>Hey, that's not how ping works</h2>
-	<p>Yeah, I don't care.</p>
   </div>
 </body>
 <script type="text/javascript">
@@ -110,11 +107,10 @@ function ping(region, cb) {
       cb({'error': true});
       return;
     }
-		if (results[region] == undefined) {
-			results[region] = [];
-		}
-		results[region].push(took);
-		cb({});
+		if (took < 1000) {
+			results[region].push(took);
+			cb({});
+	  }
   };
 
   try {

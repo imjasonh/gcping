@@ -4,7 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"golang.org/x/net/context"
 	"cloud.google.com/go/bigquery"
+)
+
+const (
+	dataset = "gcping"
+	table = "gcping"
 )
 
 func init() {
@@ -17,7 +23,7 @@ func redir(w http.ResponseWriter, r *http.Request) {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-fmt.Fprint(w, "Hello")
+	fmt.Fprint(w, "Hello")
 }
 
 func write(ctx context.Context) {

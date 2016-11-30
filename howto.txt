@@ -2,11 +2,10 @@ PROJECT_ID=gcping-1369
 SITE=www.gcping.com
 
 # Create buckets in each region/multiregion
-gsutil mb -c regional -l us-central1 gs://$PROJECT-us-central1
-gsutil mb -c regional -l us-east1 gs://$PROJECT-us-east1
-gsutil mb -c regional -l asia-east1 gs://$PROJECT-asia-east1
-gsutil mb -c regional -l asia-northeast1 gs://$PROJECT-asia-northeast1
-gsutil mb -c regional -l europe-west1 gs://$PROJECT-europe-west1
+regions="us-central1 us-east1 us-west1 europe-west1 asia-east1 asia-northeast1"
+for r in $regions; do
+  gsutil mb -c regional -l $r gs://$PROJECT-$r
+done
 
 # Set defacl public-read on buckets
 gsutil ls -p $PROJECT_ID | xargs gsutil defacl set public-read

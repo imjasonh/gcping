@@ -12,6 +12,7 @@ import SimpleHTTPServer
 
 class MyHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def end_headers(self):
+        self.send_header("Cache-Control", "no-store")
         self.send_header("Access-Control-Allow-Origin", "*")
         SimpleHTTPServer.SimpleHTTPRequestHandler.end_headers(self)
 

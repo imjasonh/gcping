@@ -211,7 +211,7 @@ stopstart.onclick = function() {
     stopstart.innerText = 'Stop';
     stopstart.style.backgroundColor = 'red';
     document.dispatchEvent(new Event('nextping'));
-    setTimeout(stopstart.onclick, 10000); // stop after 10s.
+    setTimeout(stopstart.onclick, 30000); // stop after 30s.
   } else {
     console.log('stopping');
     stopped = true;

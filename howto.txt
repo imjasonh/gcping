@@ -30,8 +30,15 @@ gsutil web set -m index.html gs://$SITE
 
 ## Set up GCE instances
 regions="us-central1 us-east1 us-west1 europe-west1 asia-east1 asia-northeast1"
+
+# Create static addresses
 for r in $regions; do
-addr=$(gcloud compute --project=$PROJECT_ID addresses create "$r" --region=$r | grep "address:" | cut -d' ' -f2)
+gcloud compute --project=$PROJECT_ID addresses create "$r" --region=$r
+done
+
+# Create VMs
+for r in $regions; do
+addr=$(gcloud compute --project=$PROJECT_ID addresses describe "$r" --region=$r | grep "address:" | cut -d' ' -f2)
 echo $r $addr
 gcloud compute --project=$PROJECT_ID instances create "$r" \
   --zone "$r-b" \

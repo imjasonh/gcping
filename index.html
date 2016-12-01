@@ -12,8 +12,12 @@ h1, h3 {
   text-align: center;
 }
 
+thead {
+	font-weight: bold;
+}
+
 #container {
-  width: 700px;
+  width: 600px;
   margin: auto;
 }
 
@@ -24,7 +28,7 @@ a, a:visited {
 td {
   padding: 10px;
   text-align: center;
-  width: 25%;
+  width: 33%;
 }
 
 td.result {
@@ -59,44 +63,38 @@ button {
   <div id="container">
   <h1>Measure your latency to <a href="https://cloud.google.com/compute/docs/regions-zones/regions-zones">GCP regions</a></h1>
   <table>
+		<thead><tr>
+      <td>Region</td>
+      <td>Google Compute Engine</td>
+      <td>Google Cloud Storage</td>
+    </tr></thead>
     <tr>
-      <td colspan="2">&nbsp;</td>
-      <td><h3>Google Compute Engine</h3></td>
-      <td><h3>Google Cloud Storage</h3></td>
-    </tr>
-    <tr>
-      <td>us-central1</td>
-      <td><a href="https://www.google.com/about/datacenters/inside/locations/council-bluffs/">Central US</a></td>
+      <td><a href="https://www.google.com/about/datacenters/inside/locations/council-bluffs/">us-central1</a></td>
       <td class="result" id="gce-us-central1-result">&nbsp;</td>
       <td class="result" id="gcs-us-central1-result">&nbsp;</td>
     </tr>
     <tr>
-      <td>us-east1</td>
-      <td><a href="https://www.google.com/about/datacenters/inside/locations/berkeley-county/">Eastern US</a></td>
+      <td><a href="https://www.google.com/about/datacenters/inside/locations/berkeley-county/">us-east1</a></td>
       <td class="result" id="gce-us-east1-result">&nbsp;</td>
       <td class="result" id="gcs-us-east1-result">&nbsp;</td>
     </tr>
     <tr>
-      <td>us-west1</td>
-      <td><a href="https://www.google.com/about/datacenters/inside/locations/the-dalles/">Western US</a></td>
+      <td><a href="https://www.google.com/about/datacenters/inside/locations/the-dalles/">us-west1</a></td>
       <td class="result" id="gce-us-west1-result">&nbsp;</td>
       <td class="result" id="gcs-us-west1-result">&nbsp;</td>
     </tr>
     <tr>
-      <td>europe-west1</td>
-      <td><a href="https://www.google.com/about/datacenters/inside/locations/st-ghislain/">Western Europe</a></td>
+      <td><a href="https://www.google.com/about/datacenters/inside/locations/st-ghislain/">europe-west1</a></td>
       <td class="result" id="gce-europe-west1-result">&nbsp;</td>
       <td class="result" id="gcs-europe-west1-result">&nbsp;</td>
     </tr>
     <tr>
-      <td>asia-east1</td>
-      <td><a href="https://www.google.com/about/datacenters/inside/locations/changhua-county/">Eastern Asia</a></td>
+      <td><a href="https://www.google.com/about/datacenters/inside/locations/changhua-county/">asia-east1</a></td>
       <td class="result" id="gce-asia-east1-result">&nbsp;</td>
       <td class="result" id="gcs-asia-east1-result">&nbsp;</td>
     </tr>
     <tr>
       <td>asia-northeast1</td>
-      <td>Northeastern Asia</td>
       <td class="result" id="gce-asia-northeast1-result">&nbsp;</td>
       <td class="result" id="gcs-asia-northeast1-result">&nbsp;</td>
     </tr>
@@ -106,6 +104,8 @@ button {
   
   <h3>How does this work?</h3>
   <p>For Compute Engine, requests are made to a <code>f1-micro</code> instance in each region. For Cloud Storage, a small object is fetched from a bucket in each region. The average time between request and response are shown.</p>
+	
+	<p><a href="https://github.com/imjasonh/gcping">Source available on GitHub</a></p>
   </div>
 </body>
 <script type="text/javascript">
@@ -208,7 +208,7 @@ stopstart.onclick = function() {
     stopstart.innerText = 'Stop';
     stopstart.style.backgroundColor = 'red';
     document.dispatchEvent(new Event('nextping'));
-    setTimeout(stopstart.onclick, 60000); // stop after 1m.
+    setTimeout(stopstart.onclick, 10000); // stop after 10s.
   } else {
     console.log('stopping');
     stopped = true;

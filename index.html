@@ -137,12 +137,13 @@ for (k in _URLS) {
   _URLS_REVERSE[_URLS[k]] = k;
   results[k] = [];
 }
+const _TIMEOUT = 3000; // ms
 
 function ping(url, cb) {
   let start = new Date().getTime();
   let xhr = new XMLHttpRequest();
   xhr.open('GET', url);
-  xhr.timeout = 3000;
+  xhr.timeout = _TIMEOUT;
   xhr.onreadystatechange = function() {
     let took = new Date().getTime()-start;
     if (xhr.readyState != 4) { return; }
@@ -185,7 +186,7 @@ document.addEventListener('nextping', function() {
     } else if (res['timeout'] != undefined) {
       out.style.backgroundColor = 'gray';
       out.style.color = 'white';
-      out.innerText = '>3s';
+      out.innerText = '>' + _TIMEOUT.toFixed(2) + 'ms';
     } else {
       out.style.backgroundColor = 'white';
       out.style.color = 'black';

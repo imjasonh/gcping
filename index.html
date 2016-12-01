@@ -13,18 +13,18 @@ h1, h3 {
 }
 
 #container {
-  width: 600px;
+  width: 700px;
   margin: auto;
 }
 
 a, a:visited {
-	color: blue;
+  color: blue;
 }
 
 td {
   padding: 10px;
   text-align: center;
-	width: 33%;
+  width: 25%;
 }
 
 td.result {
@@ -44,6 +44,15 @@ table {
 tr#lastrow td {
   border: 0;
 }
+
+button {
+  height: 50px;
+  width: 100px;
+  display: block;
+  margin: auto;
+  margin-top: 10px;
+  color: white;
+}
 </style>
 </head>
 <body>
@@ -51,68 +60,103 @@ tr#lastrow td {
   <h1>Measure your latency to <a href="https://cloud.google.com/compute/docs/regions-zones/regions-zones">GCP regions</a></h1>
   <table>
     <tr>
+      <td colspan="2">&nbsp;</td>
+      <td><h3>Google Compute Engine</h3></td>
+      <td><h3>Google Cloud Storage</h3></td>
+    </tr>
+    <tr>
       <td>us-central1</td>
       <td><a href="https://www.google.com/about/datacenters/inside/locations/council-bluffs/">Central US</a></td>
-      <td class="result" id="us-central1-result">&nbsp;</td>
+      <td class="result" id="gce-us-central1-result">&nbsp;</td>
+      <td class="result" id="gcs-us-central1-result">&nbsp;</td>
     </tr>
     <tr>
       <td>us-east1</td>
       <td><a href="https://www.google.com/about/datacenters/inside/locations/berkeley-county/">Eastern US</a></td>
-      <td class="result" id="us-east1-result">&nbsp;</td>
+      <td class="result" id="gce-us-east1-result">&nbsp;</td>
+      <td class="result" id="gcs-us-east1-result">&nbsp;</td>
     </tr>
     <tr>
       <td>us-west1</td>
       <td><a href="https://www.google.com/about/datacenters/inside/locations/the-dalles/">Western US</a></td>
-      <td class="result" id="us-west1-result">&nbsp;</td>
+      <td class="result" id="gce-us-west1-result">&nbsp;</td>
+      <td class="result" id="gcs-us-west1-result">&nbsp;</td>
     </tr>
     <tr>
       <td>europe-west1</td>
       <td><a href="https://www.google.com/about/datacenters/inside/locations/st-ghislain/">Western Europe</a></td>
-      <td class="result" id="europe-west1-result">&nbsp;</td>
+      <td class="result" id="gce-europe-west1-result">&nbsp;</td>
+      <td class="result" id="gcs-europe-west1-result">&nbsp;</td>
     </tr>
     <tr>
       <td>asia-east1</td>
       <td><a href="https://www.google.com/about/datacenters/inside/locations/changhua-county/">Eastern Asia</a></td>
-      <td class="result" id="asia-east1-result">&nbsp;</td>
+      <td class="result" id="gce-asia-east1-result">&nbsp;</td>
+      <td class="result" id="gcs-asia-east1-result">&nbsp;</td>
     </tr>
     <tr>
       <td>asia-northeast1</td>
       <td>Northeastern Asia</td>
-      <td class="result" id="asia-northeast1-result">&nbsp;</td>
+      <td class="result" id="gce-asia-northeast1-result">&nbsp;</td>
+      <td class="result" id="gcs-asia-northeast1-result">&nbsp;</td>
     </tr>
-    <tr id="lastrow"><td /><td /><td><button id="stopstart">Stop</button></td></tr>
   </table>
   
+  <button id="stopstart">Stop</button>
+  
   <h3>How does this work?</h3>
-  <p>A small object is repeatedly fetched from a Google Cloud Storage bucket in each region, and the average time between request and response is shown.</p>
+  <p>For Compute Engine, requests are made to a <code>f1-micro</code> instance in each region. For Cloud Storage, a small object is fetched from a bucket in each region. The average time between request and response are shown.</p>
   </div>
 </body>
 <script type="text/javascript">
 // TODO: Highlight fastest/closest region.
 // TODO: Show regions on a map, with lines overlayed according to ping times.
 // TODO: Add an option to contribute times and JS geolocation info to a public BigQuery dataset.
-// TODO: Add pings for GCE, GAE, GCF, GCR(?), etc.
+// TODO: Add pings for GAE, GCF, GCR(?), etc.
 
-function ping(region, cb) {
+const _URLS = {
+  'gce-us-central1':     'http://104.197.165.8/ping',
+  'gce-us-east1':        'http://104.196.161.21/ping',
+  'gce-us-west1':        'http://104.199.116.74/ping',
+  'gce-europe-west1':    'http://104.199.82.109/ping',
+  'gce-asia-east1':      'http://104.155.201.52/ping',
+  'gce-asia-northeast1': 'http://104.198.86.148/ping',
+  'gcs-us-central1':     'https://storage.googleapis.com/gcping-us-central1/ping',
+  'gcs-us-east1':        'https://storage.googleapis.com/gcping-us-east1/ping',
+  'gcs-us-west1':        'https://storage.googleapis.com/gcping-us-west1/ping',
+  'gcs-europe-west1':    'https://storage.googleapis.com/gcping-europe-west1/ping',
+  'gcs-asia-east1':      'https://storage.googleapis.com/gcping-asia-east1/ping',
+  'gcs-asia-northeast1': 'https://storage.googleapis.com/gcping-asia-northeast1/ping',
+};
+let _KEYS = [];
+let idx = 0;
+let _URLS_REVERSE = {}; // reverse of _URLS
+let results = {};
+for (k in _URLS) {
+  _KEYS.push(k);
+  _URLS_REVERSE[_URLS[k]] = k;
+  results[k] = [];
+}
+
+function ping(url, cb) {
   let start = new Date().getTime();
   let xhr = new XMLHttpRequest();
-  let url = 'https://storage.googleapis.com/gcping-'+region+'/ping';
   xhr.open('GET', url);
-	xhr.timeout = 1000;
+  xhr.timeout = 3000;
   xhr.onreadystatechange = function() {
     let took = new Date().getTime()-start;
     if (xhr.readyState != 4) { return; }
     if (xhr.status >= 400) {
       console.error(xhr);
       cb({'error': true});
-      return;
+    } else if (took > xhr.timeout) {
+      cb({'timeout':true});
+    } else {
+      k = _URLS_REVERSE[url];
+      results[k].push(took);
+      cb({});
     }
-		if (took < 1000) {
-			results[region].push(took);
-			cb({});
-	  }
   };
-
   try {
     xhr.send('');
   } catch (e) {
@@ -128,54 +172,49 @@ function avg(arr) {
   return sum / arr.length;
 }
 
-const _REGIONS = [
-	'us-central1',
-	'us-east1',
-	'us-west1',
-	'europe-west1',
-	'asia-east1',
-	'asia-northeast1'
-]
-let idx = 0;
-
-let results = {};
-_REGIONS.forEach(function(r){ results[r] = []; });
-
-function continuous() {
-  console.log('pinging continuously');
-  setInterval(pingEach, 1000);
-}
-
-function pingEach() {
-	let region = _REGIONS[idx];
-	idx = (idx+1)%_REGIONS.length;
-  ping(region, function(res) {
-		let a = avg(results[region]);
-    let out = document.getElementById(region+'-result');
+document.addEventListener('nextping', function() {
+  let id = _KEYS[idx];
+  idx = (idx+1)%_KEYS.length; // wrap around
+  ping(_URLS[id], function(res) {
+    let a = avg(results[id]);
+    let out = document.getElementById(id+'-result');
     if (res['error'] != undefined) {
       out.style.backgroundColor = 'red';
       out.style.color = 'white';
       out.innerText = 'error';
-      return;
+    } else if (res['timeout'] != undefined) {
+      out.style.backgroundColor = 'gray';
+      out.style.color = 'white';
+      out.innerText = '>3s';
+    } else {
+      out.style.backgroundColor = 'white';
+      out.style.color = 'black';
+      out.innerText = a.toFixed(2) + 'ms';
     }
-    out.innerText = a.toFixed(2) + 'ms';
+    if (!stopped) {
+      setTimeout(function() {
+        document.dispatchEvent(new Event('nextping'));
+      }, 100);
+    }
   });
-}
+});
 
-let interval = null;
+let stopped = true;
 let stopstart = document.getElementById('stopstart')
 stopstart.onclick = function() {
-	if (interval == null) {
-		console.log('starting');
-		interval = setInterval(pingEach, 1000);
-		stopstart.innerText = 'Stop';
-		setTimeout(stopstart.onclick, 60000); // stop after 1m.
-	} else {
-		console.log('stopping');
-		clearInterval(interval);
-		interval = null;
-		stopstart.innerText = 'Start';
-	}
+  if (stopped) {
+    console.log('starting');
+    stopped = false;
+    stopstart.innerText = 'Stop';
+    stopstart.style.backgroundColor = 'red';
+    document.dispatchEvent(new Event('nextping'));
+    setTimeout(stopstart.onclick, 60000); // stop after 1m.
+  } else {
+    console.log('stopping');
+    stopped = true;
+    stopstart.style.backgroundColor = 'green';
+    stopstart.innerText = 'Start';
+  }
 };
 stopstart.onclick();
 </script>

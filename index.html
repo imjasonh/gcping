@@ -49,13 +49,16 @@ tr#lastrow td {
   border: 0;
 }
 
-button {
-  height: 50px;
+div#stopstart {
+  padding-top: 20px;
+  padding-bottom: 20px;
   width: 100px;
-  display: block;
+  border-radius: 5px;
   margin: auto;
   margin-top: 10px;
   color: white;
+  text-align: center;
+  vertical-align: middle;
 }
 
 img#pingimg {
@@ -97,7 +100,7 @@ img#pingimg {
       <td class="result" id="gce-asia-northeast1-result">&nbsp;</td>
     </tr>
   </table>
-  <button id="stopstart">Stop</button>
+  <div id="stopstart">Stop</div>
   <h3>How does this work?</h3>
   <p>HTTP requests are made to a <code>f1-micro</code> instance in each region. The median time between request and response are shown.</p>
   <p>This project is not affiliated with or sponsored by Google.</p>
@@ -110,6 +113,7 @@ img#pingimg {
 // TODO: Highlight fastest/closest region.
 // TODO: Show regions on a map, with lines overlayed according to ping times.
 // TODO: Add an option to contribute times and JS geolocation info to a public BigQuery dataset.
+// TODO: Re-add pings for GCS.
 // TODO: Add pings for GAE, GCF, GCR(?), etc.
 
 const _URLS = {

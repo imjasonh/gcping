@@ -66,34 +66,38 @@ img#pingimg {
   display: none;
   visibility: hidden;
 }
+
+td.result::selection{
+  background-color: #fed;
+}
 </style>
 </head>
 <body>
   <div id="container">
-  <h1>Measure your latency to <a href="https://cloud.google.com/compute/docs/regions-zones/regions-zones">GCP regions</a></h1>
+  <h1>Measure your latency to <a target="_blank" href="https://cloud.google.com/compute/docs/regions-zones/regions-zones">GCP regions</a></h1>
   <table>
     <thead><tr>
       <td>Region</td>
       <td>Median Latency</td>
     </tr></thead>
     <tr>
-      <td><a href="https://www.google.com/about/datacenters/inside/locations/council-bluffs/">us-central1</a></td>
+      <td><a target="_blank" href="https://www.google.com/about/datacenters/inside/locations/council-bluffs/">us-central1</a></td>
       <td class="result" id="gce-us-central1-result">&nbsp;</td>
     </tr>
     <tr>
-      <td><a href="https://www.google.com/about/datacenters/inside/locations/berkeley-county/">us-east1</a></td>
+      <td><a target="_blank" href="https://www.google.com/about/datacenters/inside/locations/berkeley-county/">us-east1</a></td>
       <td class="result" id="gce-us-east1-result">&nbsp;</td>
     </tr>
     <tr>
-      <td><a href="https://www.google.com/about/datacenters/inside/locations/the-dalles/">us-west1</a></td>
+      <td><a target="_blank" href="https://www.google.com/about/datacenters/inside/locations/the-dalles/">us-west1</a></td>
       <td class="result" id="gce-us-west1-result">&nbsp;</td>
     </tr>
     <tr>
-      <td><a href="https://www.google.com/about/datacenters/inside/locations/st-ghislain/">europe-west1</a></td>
+      <td><a target="_blank" href="https://www.google.com/about/datacenters/inside/locations/st-ghislain/">europe-west1</a></td>
       <td class="result" id="gce-europe-west1-result">&nbsp;</td>
     </tr>
     <tr>
-      <td><a href="https://www.google.com/about/datacenters/inside/locations/changhua-county/">asia-east1</a></td>
+      <td><a target="_blank" href="https://www.google.com/about/datacenters/inside/locations/changhua-county/">asia-east1</a></td>
       <td class="result" id="gce-asia-east1-result">&nbsp;</td>
     </tr>
     <tr>
@@ -105,7 +109,7 @@ img#pingimg {
   <h3>How does this work?</h3>
   <p>HTTP requests are made to a <code>f1-micro</code> instance in each region. The median time between request and response are shown.</p>
   <p>This project is not affiliated with or sponsored by Google.</p>
-  <p><a href="https://github.com/imjasonh/gcping">Source available on GitHub</a>.</p>
+  <p><a target="_blank" href="https://github.com/imjasonh/gcping">Source available on GitHub</a>.</p>
   </div>
 
   <img id="pingimg"></img>
@@ -154,6 +158,7 @@ document.addEventListener('nextping', function() {
     let a = median(results[id]);
     let out = document.getElementById(id+'-result');
     out.innerText = a + 'ms';
+    select(out);
     if (!stopped) {
       setTimeout(function() {
         document.dispatchEvent(new Event('nextping'));
@@ -163,6 +168,20 @@ document.addEventListener('nextping', function() {
   img.onerror = img.onload;
   img.src = url;
 });
+
+function select(el) {
+  if (document.selection) {
+    var range = document.body.createTextRange();
+    range.moveToElementText(el);
+    range.select();
+  } else if (window.getSelection) {
+    var range = document.createRange();
+    range.selectNode(el);
+    var sel = document.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+}
 
 let stopped = true;
 let stopstart = document.getElementById('stopstart')

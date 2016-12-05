@@ -57,6 +57,11 @@ button {
   margin-top: 10px;
   color: white;
 }
+
+img#pingimg {
+  display: none;
+  visibility: hidden;
+}
 </style>
 </head>
 <body>
@@ -105,6 +110,8 @@ button {
   <p>This project is not affiliated with or sponsored by Google.</p>
   <p><a href="https://github.com/imjasonh/gcping">Source available on GitHub</a></p>
   </div>
+
+  <img id="pingimg"></img>
 </body>
 <script type="text/javascript">
 // TODO: Highlight fastest/closest region.
@@ -135,35 +142,6 @@ for (k in _URLS) {
   _URLS_REVERSE[_URLS[k]] = k;
   results[k] = [];
 }
-const _TIMEOUT = 3000; // ms
-
-function ping(url, cb) {
-  let start = new Date().getTime();
-  let xhr = new XMLHttpRequest();
-  xhr.open('GET', url);
-  xhr.timeout = _TIMEOUT;
-  xhr.onreadystatechange = function() {
-    let took = new Date().getTime()-start;
-    if (xhr.readyState != 4) { return; }
-    if (xhr.status >= 400) {
-      console.error(xhr);
-      cb({'error': true});
-    } else if (took > xhr.timeout) {
-      cb({'timeout':true});
-    } else {
-      k = _URLS_REVERSE[url];
-      results[k].push(took);
-      cb({});
-    }
-  };
-  try {
-    xhr.send('');
-  } catch (e) {
-    console.error(e);
-    cb({'error': true});
-    return;
-  }
-}
 
 function median(arr) {
   if (arr.length == 0) { return 0; }
@@ -174,28 +152,24 @@ function median(arr) {
 document.addEventListener('nextping', function() {
   let id = _KEYS[idx];
   idx = (idx+1)%_KEYS.length; // wrap around
-  ping(_URLS[id], function(res) {
+  let url = _URLS[id];
+
+  let img = document.getElementById('pingimg');
+  let start = new Date().getTime();
+  img.onload = function() {
+    let took = new Date().getTime()-start;
+    results[id].push(took);
     let a = median(results[id]);
     let out = document.getElementById(id+'-result');
-    if (res['error'] != undefined) {
-      out.style.backgroundColor = 'red';
-      out.style.color = 'white';
-      out.innerText = 'error';
-    } else if (res['timeout'] != undefined) {
-      out.style.backgroundColor = 'gray';
-      out.style.color = 'white';
-      out.innerText = '>' + _TIMEOUT.toFixed(2) + 'ms';
-    } else {
-      out.style.backgroundColor = 'white';
-      out.style.color = 'black';
-      out.innerText = a.toFixed(2) + 'ms';
-    }
+    out.innerText = a.toFixed(2) + 'ms';
     if (!stopped) {
       setTimeout(function() {
         document.dispatchEvent(new Event('nextping'));
       }, 100);
     }
-  });
+  };
+  img.onerror = img.onload;
+  img.src = url;
 });
 
 let stopped = true;

@@ -161,7 +161,7 @@ document.addEventListener('nextping', function() {
     results[id].push(took);
     let a = median(results[id]);
     let out = document.getElementById(id+'-result');
-    out.innerText = a.toFixed(2) + 'ms';
+    out.innerText = a + 'ms';
     if (!stopped) {
       setTimeout(function() {
         document.dispatchEvent(new Event('nextping'));

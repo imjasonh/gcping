@@ -1,22 +1,23 @@
-# Install Python
-sudo apt-get install software-properties-common python-software-properties
-sudo add-apt-repository ppa:fkrull/deadsnakes-python2.7
-sudo apt-get update
-sudo apt-get install python2.7
+# Install Go
+sudo apt install -y golang-go || exit
 
 # Start simple HTTP server with CORS header set.
-echo "pong" > ping
-cat << EOF > cors-http-server.py
-#!/usr/bin/env python
-import SimpleHTTPServer
+cat << EOF > main.go
+package main
 
-class MyHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
-    def end_headers(self):
-        self.send_header("Cache-Control", "no-store")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        SimpleHTTPServer.SimpleHTTPRequestHandler.end_headers(self)
+import (
+  "fmt"
+  "log"
+  "net/http"
+)
 
-if __name__ == '__main__':
-    SimpleHTTPServer.test(HandlerClass=MyHTTPRequestHandler)
+func main() {
+  http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
+    w.Header().Add("Cache-Control", "no-store")
+    w.Header().Add("Access-COntrol-Allow-Origin", "*")
+    fmt.Fprint(w, "pong")
+  })
+  log.Fatal(http.ListenAndServe(":80", nil))
+}
 EOF
-sudo python cors-http-server.py 80
+sudo go run main.go

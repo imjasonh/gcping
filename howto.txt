@@ -38,6 +38,7 @@ done
 
 # Create VMs
 for r in $regions; do
+gcloud compute --project=$PROJECT_ID instances delete "$r" --zone="$r-b" || true
 addr=$(gcloud compute --project=$PROJECT_ID addresses describe "$r" --region=$r | grep "address:" | cut -d' ' -f2)
 echo $r $addr
 gcloud compute --project=$PROJECT_ID instances create "$r" \

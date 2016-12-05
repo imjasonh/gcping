@@ -31,10 +31,12 @@ td {
   width: 50%;
 }
 
-td.result {
-  width: 100px;
-  text-align: right;
+tbody td {
   font-family: monospace;
+}
+
+td.result {
+  text-align: right;
 }
 
 table, td {
@@ -43,10 +45,6 @@ table, td {
 
 table {
   width: 100%;
-}
-
-tr#lastrow td {
-  border: 0;
 }
 
 div#stopstart {
@@ -67,8 +65,16 @@ img#pingimg {
   visibility: hidden;
 }
 
-td.result::selection{
-  background-color: #fed;
+@keyframes kf {
+  0% {
+    background-color: lightgreen;
+  }
+  100% {
+    background-color: white;
+  }
+}
+td.selected {
+  animation: kf .5s;
 }
 </style>
 </head>
@@ -80,7 +86,7 @@ td.result::selection{
       <td>Region</td>
       <td>Median Latency</td>
     </tr></thead>
-    <tr>
+    <tbody><tr>
       <td><a target="_blank" href="https://www.google.com/about/datacenters/inside/locations/council-bluffs/">us-central1</a></td>
       <td class="result" id="gce-us-central1-result">&nbsp;</td>
     </tr>
@@ -103,7 +109,7 @@ td.result::selection{
     <tr>
       <td>asia-northeast1</td>
       <td class="result" id="gce-asia-northeast1-result">&nbsp;</td>
-    </tr>
+    </tr></tbody>
   </table>
   <div id="stopstart">Stop</div>
   <h3>How does this work?</h3>
@@ -157,8 +163,11 @@ document.addEventListener('nextping', function() {
     results[id].push(took);
     let a = median(results[id]);
     let out = document.getElementById(id+'-result');
+    let prevText = out.innerText;
     out.innerText = a + 'ms';
-    select(out);
+    if (out.innerText != prevText) {
+      select(out);
+    }
     if (!stopped) {
       setTimeout(function() {
         document.dispatchEvent(new Event('nextping'));
@@ -170,17 +179,13 @@ document.addEventListener('nextping', function() {
 });
 
 function select(el) {
-  if (document.selection) {
-    var range = document.body.createTextRange();
-    range.moveToElementText(el);
-    range.select();
-  } else if (window.getSelection) {
-    var range = document.createRange();
-    range.selectNode(el);
-    var sel = document.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
+  let prev = document.getElementsByClassName('selected');
+  for (let i = 0; i < prev.length; i++) {
+    let cl = prev.item(i).classList;
+    cl.remove('selected');
   }
+  let cl = el.classList;
+  cl.add('selected');
 }
 
 let stopped = true;

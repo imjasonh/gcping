@@ -14,7 +14,7 @@ import (
 func main() {
   http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
     w.Header().Add("Cache-Control", "no-store")
-    w.Header().Add("Access-COntrol-Allow-Origin", "*")
+    w.Header().Add("Access-Control-Allow-Origin", "*")
     fmt.Fprint(w, "pong")
   })
   log.Fatal(http.ListenAndServe(":80", nil))

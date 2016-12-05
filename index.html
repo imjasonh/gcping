@@ -13,7 +13,7 @@ h1, h3 {
 }
 
 thead {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 #container {
@@ -63,7 +63,7 @@ button {
   <div id="container">
   <h1>Measure your latency to <a href="https://cloud.google.com/compute/docs/regions-zones/regions-zones">GCP regions</a></h1>
   <table>
-		<thead><tr>
+    <thead><tr>
       <td>Region</td>
       <td>Google Compute Engine</td>
       <td>Google Cloud Storage</td>
@@ -99,15 +99,11 @@ button {
       <td class="result" id="gcs-asia-northeast1-result">&nbsp;</td>
     </tr>
   </table>
-  
   <button id="stopstart">Stop</button>
-  
   <h3>How does this work?</h3>
-  <p>For Compute Engine, requests are made to a <code>f1-micro</code> instance in each region. For Cloud Storage, a small object is fetched from a bucket in each region. The average time between request and response are shown.</p>
-	
-	<p>This project is not affiliated with or sponsored by Google.</p>
-	
-	<p><a href="https://github.com/imjasonh/gcping">Source available on GitHub</a></p>
+  <p>For Compute Engine, requests are made to a <code>f1-micro</code> instance in each region. For Cloud Storage, a small object is fetched from a bucket in each region. The median time between request and response are shown.</p>
+  <p>This project is not affiliated with or sponsored by Google.</p>
+  <p><a href="https://github.com/imjasonh/gcping">Source available on GitHub</a></p>
   </div>
 </body>
 <script type="text/javascript">
@@ -169,17 +165,17 @@ function ping(url, cb) {
   }
 }
 
-function avg(arr) {
-  let sum = 0;
-  arr.forEach(function(x) { sum += x });
-  return sum / arr.length;
+function median(arr) {
+  if (arr.length == 0) { return 0; }
+  arr.sort();
+  return arr[Math.floor(arr.length/2)];
 }
 
 document.addEventListener('nextping', function() {
   let id = _KEYS[idx];
   idx = (idx+1)%_KEYS.length; // wrap around
   ping(_URLS[id], function(res) {
-    let a = avg(results[id]);
+    let a = median(results[id]);
     let out = document.getElementById(id+'-result');
     if (res['error'] != undefined) {
       out.style.backgroundColor = 'red';

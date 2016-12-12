@@ -1,0 +1,52 @@
+Metadata-Version: 2.0
+Name: google-cloud-core
+Version: 0.22.1
+Summary: API Client library for Google Cloud: Core Helpers
+Home-page: https://github.com/GoogleCloudPlatform/google-cloud-python
+Author: Google Cloud Platform
+Author-email: jjg+google-cloud-python@google.com
+License: Apache 2.0
+Platform: Posix; MacOS X; Windows
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Topic :: Internet
+Requires-Dist: google-auth (>=0.4.0,<2.0.0dev)
+Requires-Dist: google-auth-httplib2
+Requires-Dist: googleapis-common-protos (>=1.3.4)
+Requires-Dist: httplib2 (>=0.9.1)
+Requires-Dist: protobuf (>=3.0.0)
+Requires-Dist: six
+
+Core Helpers for Google Cloud Python Client Library
+===================================================
+
+This library is not meant to stand-alone. Instead it defines
+common helpers (e.g. base ``Client`` and ``Connection`` classes)
+used by all of the ``google-cloud-*``.
+
+|pypi| |versions|
+
+-  `Documentation`_
+
+.. _Documentation: https://googlecloudplatform.github.io/google-cloud-python/stable/google-cloud-api.html
+
+Quick Start
+-----------
+
+.. code-block:: console
+
+    $ pip install --upgrade google-cloud-core
+
+.. |pypi| image:: https://img.shields.io/pypi/v/google-cloud-core.svg
+   :target: https://pypi.python.org/pypi/google-cloud-core
+.. |versions| image:: https://img.shields.io/pypi/pyversions/google-cloud-core.svg
+   :target: https://pypi.python.org/pypi/google-cloud-core
+
+

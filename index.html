@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,user-scalable=no">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
   <title>GCP ping</title>
 <style>
 body, input {
@@ -68,14 +68,14 @@ img#pingimg {
 
 @keyframes kf {
   0% {
-    background-color: lightgreen;
+    background-color: lightblue;
   }
   100% {
     background-color: white;
   }
 }
 td.selected {
-  animation: kf .5s;
+  animation: kf .25s;
 }
 </style>
 </head>
@@ -169,9 +169,7 @@ document.addEventListener('nextping', function() {
       select(out);
     }
     if (!stopped) {
-      setTimeout(function() {
-        document.dispatchEvent(new Event('nextping'));
-      }, 100);
+      document.dispatchEvent(new Event('nextping'));
     }
   };
   img.onerror = img.onload;
@@ -189,22 +187,22 @@ function select(el) {
 }
 
 let stopped = true;
-let stopstart = document.getElementById('stopstart')
-stopstart.onclick = function() {
+let ss = document.getElementById('stopstart');
+ss.onclick = function() {
   if (stopped) {
     console.log('starting');
     stopped = false;
-    stopstart.innerText = 'Stop';
-    stopstart.style.backgroundColor = 'red';
+    ss.innerText = 'Stop';
+    ss.style.backgroundColor = 'red';
     document.dispatchEvent(new Event('nextping'));
-    setTimeout(stopstart.onclick, 30000); // stop after 30s.
+    setTimeout(ss.onclick, 30000); // stop after 30s.
   } else {
     console.log('stopping');
     stopped = true;
-    stopstart.style.backgroundColor = 'green';
-    stopstart.innerText = 'Start';
+    ss.style.backgroundColor = 'green';
+    ss.innerText = 'Start';
   }
 };
-stopstart.onclick();
+ss.onclick();
 </script>
 </html>

@@ -3,6 +3,7 @@
 from google.cloud import bigquery
 from google.cloud.bigquery.schema import SchemaField
 
+import json
 import logging
 import webapp2
 
@@ -15,6 +16,7 @@ _SCHEMA = [
   SchemaField('lat',        'FLOAT',     'NULLABLE', 'Latitude of the user making the ping request'),
   SchemaField('lng',        'FLOAT',     'NULLABLE', 'Longitude of the user making the ping request'),
   SchemaField('region',     'STRING',    'NULLABLE', 'GCP region being pinged'),
+  SchemaField('user_agent', 'STRING',    'NULLABLE', 'Browser user-agent making ping requests'),
 ]
 
 
@@ -29,6 +31,18 @@ class API(webapp2.RequestHandler):
     if not table.exists():
       table.create()
       logging.info('Table %s created', table.name)
-    self.response.out.write('Dataset and table exist')
+    ua = self.request.headers.get('User-Agent')
+    data = json.loads(self.request.body)
+    rows = []
+    for i in data:
+      rows.append((
+        i.timestamp,
+        i.took,
+        data.lat,
+        data.lng,
+        i.region,
+        ua,
+      ))
+    table.insert_rows(rows, skip_invalid_rows=True, ignore_unknown_values=True)
 
 app = webapp2.WSGIApplication([('/api', API)])

@@ -110,7 +110,12 @@ td.selected {
     <tr>
       <td>asia-northeast1</td>
       <td class="result" id="gce-asia-northeast1-result">&nbsp;</td>
-    </tr></tbody>
+    </tr>
+    <tr>
+      <td><a href="_blank" href="https://cloud.google.com/load-balancing/">global</a></td>
+      <td class="result" id="gce-global-result">&nbsp;</td>
+    </tr>
+    </tbody>
   </table>
   <div id="stopstart">Stop</div>
   <h3>How does this work?</h3>
@@ -134,6 +139,7 @@ const _URLS = {
   'gce-europe-west1':    'http://104.199.82.109/ping',
   'gce-asia-east1':      'http://104.155.201.52/ping',
   'gce-asia-northeast1': 'http://104.198.86.148/ping',
+  'gce-global':          'http://130.211.11.245/ping',
 };
 let _KEYS = [];
 let idx = 0;

@@ -11,10 +11,12 @@ gcloud compute networks create $NETWORK_NAME \
   --mode=custom \
   --description="Non-default network"
 
+part=100
 for r in $REGIONS; do
   gcloud compute networks subnet create $SUBNET_NAME \
     --network=$NETWORK \
-    --range="10.120.0.0/0" \ # TODO: change the range for each subnet
+    --range="10.$part.0.0/0" \
+  part=$((part+2))
 done
 
 # Delete and recreate VMs.

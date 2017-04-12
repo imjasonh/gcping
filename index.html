@@ -112,14 +112,20 @@ td.selected {
       <td class="result" id="gce-asia-northeast1-result">&nbsp;</td>
     </tr>
     <tr>
+<<<<<<< HEAD
       <td>asia-southeast1</td>
       <td class="result" id="gce-asia-southeast1-result">&nbsp;</td>
+=======
+      <td><a target="_blank" href="https://cloud.google.com/load-balancing/">global</a></td>
+      <td class="result" id="gce-global-result">&nbsp;</td>
+>>>>>>> d2715ec3204f841db9108f4e7016208a68891e47
     </tr>
     </tbody>
   </table>
   <div id="stopstart">Stop</div>
   <h3>How does this work?</h3>
-  <p>HTTP requests are made to a <code>f1-micro</code> instance in each region. The median time between request and response are shown.</p>
+  <p>Your browser makes HTTP requests to <code>f1-micro</code> instances in each region. The median time between request and response is shown.</p>
+  <p>The <b>global</b> row uses a <a target="_blank" href="https://cloud.google.com/load-balancing/">Global HTTP Load Balancer</a> to route requests to the nearest healthy instance.</p>
   <p>This is not an official Google project. <a target="_blank" href="https://github.com/imjasonh/gcping">Source available on GitHub</a>.</p>
   </div>
 
@@ -131,6 +137,7 @@ td.selected {
 // TODO: Add an option to contribute times and JS geolocation info to a public BigQuery dataset.
 // TODO: Re-add pings for GCS.
 // TODO: Add pings for GAE, GCF, GCR(?), etc.
+// TODO: Add pings for Cloud CDN (backed by GCE or GCS).
 
 const _URLS = {
   'gce-us-central1':     'http://104.197.165.8/ping',
@@ -139,7 +146,11 @@ const _URLS = {
   'gce-europe-west1':    'http://104.199.82.109/ping',
   'gce-asia-east1':      'http://104.155.201.52/ping',
   'gce-asia-northeast1': 'http://104.198.86.148/ping',
+<<<<<<< HEAD
   'gce-asia-southeast1': 'http://35.185.179.198/ping',
+=======
+  'gce-global':          'http://130.211.11.245/ping',
+>>>>>>> d2715ec3204f841db9108f4e7016208a68891e47
 };
 let _KEYS = [];
 let idx = 0;
@@ -210,5 +221,15 @@ ss.onclick = function() {
   }
 };
 ss.onclick();
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-93495535-1', 'auto');
+  ga('send', 'pageview');
 </script>
 </html>

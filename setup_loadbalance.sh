@@ -3,14 +3,12 @@
 export CLOUDSDK_CORE_PROJECT=gcping-1369
 REGIONS="us-central1 us-east1 us-west1 europe-west1 asia-east1 asia-northeast1 asia-southeast1"
 
-if [[ -n $CREATE_ADDR ]]; then
-  # Create global external IP address
+lb_addr=$(gcloud compute addresses describe global --global | grep "address: " | cut -d' ' -f2)
+if [[ -n $lb_addr ]]; then
+  echo "No IP address found, creating"
   lb_addr=$(gcloud compute addresses create global --global | grep "address: " | cut -d' ' -f2)
-  echo "Load Balance IP address:" $lb_addr
-else
-  lb_addr=$(gcloud compute addresses describe global --global | grep "address: " | cut -d' ' -f2)
-  echo "Load Balance IP address:" $lb_addr
 fi
+echo "Load Balance IP address:" $lb_addr
 
 # Create health check that hits /ping
 gcloud compute http-health-checks create http-basic-check \

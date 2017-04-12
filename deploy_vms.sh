@@ -20,16 +20,16 @@ gcloud compute firewall-rules create network-allow-http \
   --target-tags=http-server
 
 part=100
-for r in $REGIONS; do
+while read r; do
   gcloud compute networks subnets create $SUBNET_NAME \
     --region=$r \
     --network=$NETWORK_NAME \
     --range="10.$part.0.0/20"
   part=$((part+2))
-done
+done < regions.txt
 
 # Delete and recreate VMs.
-for r in $REGIONS; do
+while read r; do
   # b-zones just happen to exist in every region. Let's hope that doesn't
   # change...
   zone=$r-b
@@ -55,4 +55,4 @@ for r in $REGIONS; do
     --boot-disk-device-name="$r" \
     --no-scopes \
     --no-service-account
-done
+done < regions.txt

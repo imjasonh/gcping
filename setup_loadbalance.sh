@@ -1,7 +1,6 @@
 #!/bin/bash
 
 export CLOUDSDK_CORE_PROJECT=gcping-1369
-REGIONS="us-central1 us-east1 us-west1 europe-west1 asia-east1 asia-northeast1 asia-southeast1"
 
 lb_addr=$(gcloud compute addresses describe global --global | grep "address: " | cut -d' ' -f2)
 if [[ -n $lb_addr ]]; then
@@ -35,7 +34,7 @@ gcloud compute forwarding-rules create http-content-rule \
   --target-http-proxy=http-lb-proxy \
   --ports=80
 
-for r in $REGIONS; do
+while read r; do
   ig=instance-group-$r
   zone=$r-b
 
@@ -60,7 +59,7 @@ for r in $REGIONS; do
     --instance-group=$ig \
     --instance-group-zone=$zone \
     --global
-done
+done < regions.txt
 
 # Ping LB IP until it gets a pong.
 while true; do

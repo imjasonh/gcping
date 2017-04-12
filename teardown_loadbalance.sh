@@ -3,7 +3,7 @@
 # Reverse of steps in setup_loadbalance.sh
 
 export CLOUDSDK_CORE_PROJECT=gcping-1369
-REGIONS="us-central1 us-east1 us-west1 europe-west1 asia-east1 asia-northeast1"
+REGIONS="us-central1 us-east1 us-west1 europe-west1 asia-east1 asia-northeast1 asia-southeast1"
 
 gcloud -q compute forwarding-rules    delete http-content-rule --global
 gcloud -q compute target-http-proxies delete http-lb-proxy

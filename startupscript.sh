@@ -1,4 +1,5 @@
 # Install Go
+sudo apt-get update || exit
 sudo apt install -y golang-go || exit
 
 # Start simple HTTP server with CORS header set.

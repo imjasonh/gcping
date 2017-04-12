@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECT_ID=gcping-1369
-REGIONS="us-central1 us-east1 us-west1 europe-west1 asia-east1 asia-northeast1"
+REGIONS="us-central1 us-east1 us-west1 europe-west1 asia-east1 asia-northeast1 asia-southeast1"
 
 if [[ -z $CREATE_ADDRS ]]; then
   # Create static addresses
@@ -21,13 +21,16 @@ for r in $REGIONS; do
     --zone="$r-b" \
     --machine-type=f1-micro \
     --metadata-from-file startup-script=startupscript.sh \
-    --subnet=default \
+    --network=network \
+    --subnet=subnet \
     --address=$addr \
     --tags=http-server \
     --maintenance-policy=MIGRATE \
-    --image="/ubuntu-os-cloud/ubuntu-1604-xenial-v20161130" \
+    --image-project=ubuntu-os-cloud \
+    --image-family=ubuntu-1610 \
     --boot-disk-size=10 \
     --boot-disk-type=pd-standard \
     --boot-disk-device-name="$r" \
-    --no-scopes
+    --no-scopes \
+    --no-service-account
 done

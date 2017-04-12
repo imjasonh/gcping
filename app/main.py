@@ -31,10 +31,12 @@ class API(webapp2.RequestHandler):
     if not table.exists():
       table.create()
       logging.info('Table %s created', table.name)
+
+    logging.info('Referer: %s', self.request.headers.get('Referer')
     ua = self.request.headers.get('User-Agent')
     data = json.loads(self.request.body)
     rows = []
-    for i in data:
+    for i in data.results:
       rows.append((
         i.timestamp,
         i.took,

@@ -132,7 +132,8 @@ recreateLB() {
   
   # Create global forwarding rule to route requests to HTTP proxy
   gcloud compute forwarding-rules create http-content-rule \
-    --address=$lb_addr --global \
+    --address=$lb_addr \
+    --global \
     --target-http-proxy=http-lb-proxy \
     --ports=80
   
@@ -176,9 +177,18 @@ recreateLB() {
   echo "Load balance IP:" $lb_addr
 }
 
+uploadPages() {
+  BUCKET=gs://www.gcping.com
+  gsutil cp index.html ${BUCKET}
+  gsutil cp icon.png ${BUCKET}
+  gsutil acl ch -u AllUsers:R ${BUCKET}/*
+  gsutil web set -m index.html ${BUCKET}
+}
+
 listRegions
 ensureAddrs
 deleteVMs
 recreateNetwork
 createVMs
 recreateLB
+uploadPages

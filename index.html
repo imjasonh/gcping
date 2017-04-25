@@ -217,6 +217,15 @@ ss.onclick = function() {
     ss.innerText = 'Start';
   }
 };
+
+// Pre-load an image for each URL, then start pinging with results recorded.
+// This speeds up subsequent requests. Otherwise, the first request to each IP
+// takes ~50-100ms longer, which is mysterious, because there isn't even a DNS
+// request. Oh well.
+let img = document.getElementById('pingimg');
+for (var key in _URLS) {
+  img.src = _URLS[key];
+}
 ss.onclick();
 </script>
 

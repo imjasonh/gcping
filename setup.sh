@@ -95,8 +95,7 @@ recreateLB() {
   gcloud -q compute url-maps            delete web-map
   gcloud -q compute backend-services    delete backend-service --global
   gcloud -q compute http-health-checks  delete http-basic-check
-  gcloud -q compute addresses           delete global --global
-  
+
   while read r; do
     ig=instance-group-$r
     zone=$r-b

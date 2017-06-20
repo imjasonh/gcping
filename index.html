@@ -131,6 +131,11 @@ td.selected {
       <td class="region">asia-southeast1<div class="regiondesc">Singapore</div></td>
       <td class="result" id="gce-asia-southeast1-result">&nbsp;</td>
     </tr>
+    <tr>
+      <td class="region">australia-southeast1<div class="regiondesc">Sydney</div></td>
+      <td class="result" id="gce-australia-southeast1-result">&nbsp;</td>
+    </tr>
+    <tr>
       <td class="region">global<div class="regiondesc">Global HTTP Load Balancer</div></td>
       <td class="result" id="gce-global-result">&nbsp;</td>
     </tr>
@@ -154,16 +159,17 @@ td.selected {
 // TODO: Add pings for Cloud CDN (backed by GCE or GCS).
 
 const _URLS = {
-  'gce-us-central1':     'http://104.197.165.8/ping',
-  'gce-us-east1':        'http://104.196.161.21/ping',
-  'gce-us-east4':        'http://35.186.168.152/ping',
-  'gce-us-west1':        'http://104.199.116.74/ping',
-  'gce-europe-west1':    'http://104.199.82.109/ping',
-  'gce-europe-west2':    'http://35.189.67.146/ping',
-  'gce-asia-east1':      'http://104.155.201.52/ping',
-  'gce-asia-northeast1': 'http://104.198.86.148/ping',
-  'gce-asia-southeast1': 'http://35.185.179.198/ping',
-  'gce-global':          'http://35.186.221.153/ping',
+  'gce-us-central1':          'http://104.197.165.8/ping',
+  'gce-us-east1':             'http://104.196.161.21/ping',
+  'gce-us-east4':             'http://35.186.168.152/ping',
+  'gce-us-west1':             'http://104.199.116.74/ping',
+  'gce-europe-west1':         'http://104.199.82.109/ping',
+  'gce-europe-west2':         'http://35.189.67.146/ping',
+  'gce-asia-east1':           'http://104.155.201.52/ping',
+  'gce-asia-northeast1':      'http://104.198.86.148/ping',
+  'gce-asia-southeast1':      'http://35.185.179.198/ping',
+  'gce-australia-southeast1': 'http://35.189.6.113/ping',
+  'gce-global':               'http://35.186.221.153/ping',
 };
 let _KEYS = [];
 let idx = 0;

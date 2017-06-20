@@ -1,6 +1,7 @@
 asia-east1
 asia-northeast1
 asia-southeast1
+australia-southeast1
 europe-west1
 europe-west2
 us-central1

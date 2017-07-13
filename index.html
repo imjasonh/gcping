@@ -240,6 +240,10 @@ ss.onclick = function() {
   }
 };
 
+// Pre-load an image for each URL, then start pinging with results recorded.
+// This speeds up subsequent requests. Otherwise, the first request to each IP
+// takes double the RTT because it needs to establish a connection
+  
 let images = Object.values(_URLS);
 let image;
 let remaining = images.length;

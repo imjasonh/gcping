@@ -39,7 +39,6 @@ tbody td {
 }
 
 div.regiondesc {
-  color: #666;
   font-size: 7pt;
   font-family: 'Arial', sans-serif;
 }
@@ -74,16 +73,8 @@ img#pingimg {
   visibility: hidden;
 }
 
-@keyframes kf {
-  0% {
-    background-color: lightblue;
-  }
-  100% {
-    background-color: white;
-  }
-}
-td.selected {
-  animation: kf .25s;
+tr.top {
+  background-color: #77EE77;
 }
 </style>
 </head>
@@ -95,50 +86,8 @@ td.selected {
       <td class="region">Region</td>
       <td class="result">Median Latency</td>
     </tr></thead>
-    <tbody><tr>
-      <td class="region">us-central1<div class="regiondesc">Iowa, USA</div></td>
-      <td class="result" id="gce-us-central1-result">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="region">us-east1<div class="regiondesc">South Carolina, USA</div></td>
-      <td class="result" id="gce-us-east1-result">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="region">us-east4<div class="regiondesc">Northern Virginia, USA</div></td>
-      <td class="result" id="gce-us-east4-result">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="region">us-west1<div class="regiondesc">Oregon, USA</div></td>
-      <td class="result" id="gce-us-west1-result">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="region">europe-west1<div class="regiondesc">Belgium</div></td>
-      <td class="result" id="gce-europe-west1-result">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="region">europe-west2<div class="regiondesc">London, UK</div></td>
-      <td class="result" id="gce-europe-west2-result">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="region">asia-east1<div class="regiondesc">Taiwan</div></td>
-      <td class="result" id="gce-asia-east1-result">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="region">asia-northeast1<div class="regiondesc">Tokyo</div></td>
-      <td class="result" id="gce-asia-northeast1-result">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="region">asia-southeast1<div class="regiondesc">Singapore</div></td>
-      <td class="result" id="gce-asia-southeast1-result">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="region">australia-southeast1<div class="regiondesc">Sydney</div></td>
-      <td class="result" id="gce-australia-southeast1-result">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="region">global<div class="regiondesc">Global HTTP Load Balancer</div></td>
-      <td class="result" id="gce-global-result">&nbsp;</td>
-    </tr>
+    <tbody>
+      <tr><td colspan="2">Loading...</td></tr>
     </tbody>
   </table>
   <div id="stopstart">Stop</div>
@@ -151,7 +100,6 @@ td.selected {
   <img id="pingimg"></img>
 </body>
 <script type="text/javascript">
-// TODO: Highlight fastest/closest region.
 // TODO: Show regions on a map, with lines overlayed according to ping times.
 // TODO: Add an option to contribute times and JS geolocation info to a public BigQuery dataset.
 // TODO: Re-add pings for GCS.
@@ -159,6 +107,7 @@ td.selected {
 // TODO: Add pings for Cloud CDN (backed by GCE or GCS).
 
 const _URLS = {
+  'gce-global':               'http://35.186.221.153/ping',
   'gce-us-central1':          'http://104.197.165.8/ping',
   'gce-us-east1':             'http://104.196.161.21/ping',
   'gce-us-east4':             'http://35.186.168.152/ping',
@@ -169,8 +118,8 @@ const _URLS = {
   'gce-asia-northeast1':      'http://104.198.86.148/ping',
   'gce-asia-southeast1':      'http://35.185.179.198/ping',
   'gce-australia-southeast1': 'http://35.189.6.113/ping',
-  'gce-global':               'http://35.186.221.153/ping',
 };
+const _MAX_RESULTS = 20; // Only consider most recent results.
 let _KEYS = [];
 let idx = 0;
 let _URLS_REVERSE = {}; // reverse of _URLS
@@ -181,10 +130,25 @@ for (k in _URLS) {
   results[k] = [];
 }
 
+let _DESCS = {
+  'us-central1':          'Iowa, USA',
+  'us-east1':             'South Carolina, USA',
+  'us-east4':             'Northern Virginia, USA',
+  'us-west1':             'Oregon, USA',
+  'europe-west1':         'Belgium',
+  'europe-west2':         'London, UK',
+  'asia-east1':           'Taiwan',
+  'asia-northeast1':      'Tokyo',
+  'asia-southeast1':      'Singapore',
+  'australia-southeast1': 'Sydney',
+  'global':               'Global HTTP Load Balancer',
+};
+
 function median(arr) {
   if (arr.length == 0) { return 0; }
-  arr.sort();
-  return arr[Math.floor(arr.length/2)];
+  let copy = arr.slice(0);
+  copy.sort();
+  return copy[Math.floor(copy.length/2)];
 }
 
 document.addEventListener('nextping', function() {
@@ -197,13 +161,12 @@ document.addEventListener('nextping', function() {
   img.onload = function() {
     let took = new Date().getTime()-start;
     results[id].push(took);
+    if (results[id].length > _MAX_RESULTS) {
+      results[id].shift();
+    }
     let a = median(results[id]);
     let out = document.getElementById(id+'-result');
-    let prevText = out.innerText;
-    out.innerText = a + 'ms';
-    if (out.innerText != prevText) {
-      select(out);
-    }
+    updateTable();
     if (!stopped) {
       document.dispatchEvent(new Event('nextping'));
     }
@@ -212,14 +175,27 @@ document.addEventListener('nextping', function() {
   img.src = url;
 });
 
-function select(el) {
-  let prev = document.getElementsByClassName('selected');
-  for (let i = 0; i < prev.length; i++) {
-    let cl = prev.item(i).classList;
-    cl.remove('selected');
+function updateTable() {
+  let medians = [];
+  for (k in results) {
+    medians.push([k, median(results[k])]);
   }
-  let cl = el.classList;
-  cl.add('selected');
+  medians.sort(function(a, b) {
+    if (a[1] < b[1]) { return -1; }
+    if (a[1] > b[1]) { return 1; }
+    return 0;
+  });
+
+  let html = '';
+  for (var i = 0; i < medians.length; i++) {
+    let region = medians[i][0].slice('gce-'.length);
+    let latency = medians[i][1];
+    if (latency == 0) { continue; }
+    var cls = (i == 0) ? 'top' : '';
+    html += '<tr class="'+cls+'"><td class="region">'+region+'<div class="regiondesc">'+_DESCS[region]+'</div></td>' +
+      '<td class="result" id="gce-'+region+'">'+latency+'ms</td></tr>';
+  }
+  document.getElementsByTagName('tbody')[0].innerHTML = html;
 }
 
 let stopped = true;
@@ -243,19 +219,18 @@ ss.onclick = function() {
 // Pre-load an image for each URL, then start pinging with results recorded.
 // This speeds up subsequent requests. Otherwise, the first request to each IP
 // takes double the RTT because it needs to establish a connection
-  
 let images = Object.values(_URLS);
 let image;
 let remaining = images.length;
 for (let i = 0; i < images.length; i++) {
-    image = new Image();
-    image.onerror = function () {
-        --remaining;
-        if (remaining <= 0) {
-            ss.onclick();
-        }
-    };
-    image.src = images[i];
+  image = new Image();
+  image.onerror = function () {
+    remaining--;
+    if (remaining <= 0) {
+      ss.onclick();
+    }
+  };
+  image.src = images[i];
 }
 </script>
 

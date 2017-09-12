@@ -38,7 +38,7 @@ recreateNetwork() {
     --allow=tcp:80 \
     --target-tags=http-server
 
-  part=80
+  part=20
   while read r; do
     gcloud compute networks subnets create $SUBNET_NAME \
       --region=$r \

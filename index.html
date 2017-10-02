@@ -148,6 +148,11 @@ p {
 .results-cell .region {
   font-size: 11px;
 }
+
+#tweet-logo {
+  height: 30px;
+  width: 30px;
+}
 </style>
 </head>
 <body>
@@ -179,6 +184,7 @@ p {
           </table>
         </div>
         <div class="about-content mdl-cell mdl-cell--6-col mdl-cell--1-offset-tablet mdl-cell--3-offset-desktop">
+          <center><a id="tweet-link" href="https://twitter.com/share" target="_blank"><img id="tweet-logo" src="twitter.png" alt="Tweet your latencies"></img></a></center>
           <h2>How does this work?</h2>
           <p>Your browser makes HTTP requests to <code>f1-micro</code> instances in each region. The median time between request and response is shown.</p>
           <p>The <b>global</b> row uses a <a target="_blank" href="https://cloud.google.com/load-balancing/">Global HTTP Load Balancer</a> to route requests to the nearest healthy instance.</p>
@@ -282,17 +288,26 @@ function updateTable() {
   });
 
   let html = '';
+  let tweet = 'My lowest-latency GCP regions:';
+  let place = 0;
   let top = 0;
   for (var i = 0; i < medians.length; i++) {
     let region = medians[i][0].slice('gce-'.length);
     let latency = medians[i][1];
     if (latency == 0) { continue; }
     if (i == 0 && region === 'global') { top++; }
+    if (region != 'global') { place++; }
     var cls = (i == top) ? 'top' : '';
     html += '<tr class="'+cls+'"><td class="regiondesc">'+_DESCS[region]+'<div class="region">'+region+'</div></td>' +
       '<td class="result" id="gce-'+region+'"><div>'+latency+'ms</div></td></tr>';
+
+    if (place <= 3 && region != 'global') {
+      tweet += '\n'+region+' ('+latency+'ms)';
+    }
   }
   document.getElementsByTagName('tbody')[0].innerHTML = html;
+  tweet += '\nhttp://gcping.com #GCP';
+  document.getElementById('tweet-link').href = 'https://twitter.com/share?text='+encodeURIComponent(tweet);
 }
 
 let stopped = true;

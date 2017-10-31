@@ -10,3 +10,4 @@ australia-southeast1
 europe-west2
 europe-west3
 southamerica-east1
+asia-south1

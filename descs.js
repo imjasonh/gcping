@@ -1,0 +1,18 @@
+let _DESCS = {
+  'asia-east1':              'Taiwan',
+  'asia-northeast1':         'Tokyo',
+  'asia-south1':             'Mumbai',
+  'asia-southeast1':         'Singapore',
+  'australia-southeast1':    'Sydney',
+  'europe-west1':            'Belgium',
+  'europe-west2':            'London, UK',
+  'europe-west3':            'Frankfurt, Germany',
+  'europe-west4':            'Netherlands',
+  'global':                  'Global HTTP Load Balancer',
+  'northamerica-northeast1': 'Montreal, Canada',
+  'southamerica-east1':      'São Paulo',
+  'us-central1':             'Iowa, USA',
+  'us-east1':                'South Carolina, USA',
+  'us-east4':                'Northern Virginia, USA',
+  'us-west1':                'Oregon, USA',
+};

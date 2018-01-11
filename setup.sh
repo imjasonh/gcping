@@ -176,8 +176,14 @@ recreateLB() {
   echo "Load balance IP:" $lb_addr
 }
 
+regenConfig() {
+  go run regen.go -tok=$(gcloud auth print-access-token)
+}
+
 uploadPages() {
   BUCKET=gs://www.gcping.com
+  gsutil cp config.js ${BUCKET}
+  gsutil cp descs.js ${BUCKET}
   gsutil cp index.html ${BUCKET}
   gsutil cp icon.png ${BUCKET}
   gsutil acl ch -u AllUsers:R ${BUCKET}/*
@@ -190,4 +196,5 @@ deleteVMs
 recreateNetwork
 createVMs
 recreateLB
+regenConfig
 uploadPages

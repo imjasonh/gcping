@@ -196,6 +196,7 @@ p {
     </main>
   </div>
 </body>
+<script src="config.js"></script>
 <script type="text/javascript">
 // TODO: Show regions on a map, with lines overlayed according to ping times.
 // TODO: Add an option to contribute times and JS geolocation info to a public BigQuery dataset.
@@ -203,24 +204,6 @@ p {
 // TODO: Add pings for GAE, GCF, GCR(?), etc.
 // TODO: Add pings for Cloud CDN (backed by GCE or GCS).
 
-const _URLS = {
-  'gce-global':                  'http://35.186.221.153/ping',
-  'gce-asia-east1':              'http://104.155.201.52/ping',
-  'gce-asia-northeast1':         'http://104.198.86.148/ping',
-  'gce-asia-south1':             'http://35.200.186.152/ping',
-  'gce-asia-southeast1':         'http://35.185.179.198/ping',
-  'gce-australia-southeast1':    'http://35.189.6.113/ping',
-  'gce-europe-west1':            'http://104.199.82.109/ping',
-  'gce-europe-west2':            'http://35.189.67.146/ping',
-  'gce-europe-west3':            'http://35.198.78.172/ping',
-  'gce-europe-west4':            'http://35.204.93.82/ping',
-  'gce-northamerica-northeast1': 'http://35.203.57.164/ping',
-  'gce-southamerica-east1':      'http://35.198.10.68/ping',
-  'gce-us-central1':             'http://104.197.165.8/ping',
-  'gce-us-east1':                'http://104.196.161.21/ping',
-  'gce-us-east4':                'http://35.186.168.152/ping',
-  'gce-us-west1':                'http://104.199.116.74/ping',
-};
 const _MAX_RESULTS = 20; // Only consider most recent results.
 let _KEYS = [];
 let idx = 0;
@@ -231,25 +214,6 @@ for (k in _URLS) {
   _URLS_REVERSE[_URLS[k]] = k;
   results[k] = [];
 }
-
-let _DESCS = {
-  'global':                  'Global HTTP Load Balancer',
-  'asia-east1':              'Taiwan',
-  'asia-northeast1':         'Tokyo',
-  'asia-south1':             'Mumbai',
-  'asia-southeast1':         'Singapore',
-  'australia-southeast1':    'Sydney',
-  'europe-west1':            'Belgium',
-  'europe-west2':            'London, UK',
-  'europe-west3':            'Frankfurt, Germany',
-  'europe-west4':            'Netherlands',
-  'northamerica-northeast1': 'Montreal, Canada',
-  'southamerica-east1':      'São Paulo',
-  'us-central1':             'Iowa, USA',
-  'us-east1':                'South Carolina, USA',
-  'us-east4':                'Northern Virginia, USA',
-  'us-west1':                'Oregon, USA',
-};
 
 function median(arr) {
   if (arr.length == 0) { return 0; }
@@ -298,14 +262,15 @@ function updateTable() {
   let place = 0;
   let top = 0;
   for (var i = 0; i < medians.length; i++) {
-    let region = medians[i][0].slice('gce-'.length);
+    let region = medians[i][0];
     let latency = medians[i][1];
     if (latency == 0) { continue; }
     if (i == 0 && region === 'global') { top++; }
     if (region != 'global') { place++; }
     var cls = (i == top) ? 'top' : '';
-    html += '<tr class="'+cls+'"><td class="regiondesc">'+_DESCS[region]+'<div class="region">'+region+'</div></td>' +
-      '<td class="result" id="gce-'+region+'"><div>'+latency+'ms</div></td></tr>';
+    var desc = _DESCS[region] || '';
+    html += '<tr class="'+cls+'"><td class="regiondesc">'+desc+'<div class="region">'+region+'</div></td>' +
+      '<td class="result" id="'+region+'"><div>'+latency+'ms</div></td></tr>';
 
     if (place <= 3 && region != 'global') {
       tweet += '\n'+region+' ('+latency+'ms)';

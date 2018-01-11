@@ -32,6 +32,20 @@ func main() {
 		exitf("Must provide -tok")
 	}
 
+	of, err := os.Create(*outFile)
+	if err != nil {
+		exitf("os.Open(%s): %v", *outFile, err)
+	}
+	defer of.Close()
+
+	if err := tmpl.Execute(io.MultiWriter(os.Stdout, of), addresses()); err != nil {
+		exitf("tmpl.Execute: %v", err)
+	}
+}
+
+type address struct{ Region, IP string }
+
+func addresses() []address {
 	// Get instances and IPs.
 	url := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/aggregated/addresses", *project)
 	req, err := http.NewRequest("GET", url, nil)
@@ -55,22 +69,14 @@ func main() {
 		exitf("json.Decode: %v", err)
 	}
 
-	type region struct{ Region, IP string }
-	var regions []region
+	var addresses []address
 	for reg, addrs := range response.Items {
 		reg = strings.TrimPrefix(reg, "regions/")
-		regions = append(regions, region{reg, addrs.Addresses[0].Address})
+		addresses = append(addresses, address{reg, addrs.Addresses[0].Address})
 	}
-	sort.Slice(regions, func(i, j int) bool { return regions[i].Region < regions[j].Region })
+	sort.Slice(addresses, func(i, j int) bool { return addresses[i].Region < addresses[j].Region })
+	return addresses
 
-	of, err := os.Create(*outFile)
-	if err != nil {
-		exitf("os.Open(%s): %v", *outFile, err)
-	}
-	defer of.Close()
-	if err := tmpl.Execute(io.MultiWriter(os.Stdout, of), regions); err != nil {
-		exitf("tmpl.Execute: %v", err)
-	}
 }
 
 func exitf(f string, args ...interface{}) {

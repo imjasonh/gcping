@@ -283,16 +283,18 @@ function updateTable() {
 
 let stopped = true;
 let ss = document.getElementById('stopstart');
+let st;
 ss.onclick = function() {
   if (stopped) {
     console.log('starting');
     stopped = false;
     ss.children[0].innerText = 'stop';
     document.dispatchEvent(new Event('nextping'));
-    setTimeout(ss.onclick, 30000); // stop after 30s.
+    st = setTimeout(ss.onclick, 30000); // stop after 30s.
   } else {
     console.log('stopping');
     stopped = true;
+    clearTimeout(st); // cancel the stop timeout, as it is stopped.
     ss.children[0].innerText = 'play_arrow';
   }
 };

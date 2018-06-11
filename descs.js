@@ -4,6 +4,7 @@ let _DESCS = {
   'asia-south1':             'Mumbai',
   'asia-southeast1':         'Singapore',
   'australia-southeast1':    'Sydney',
+  'europe-north1':           'Hamina, Finland',
   'europe-west1':            'Belgium',
   'europe-west2':            'London, UK',
   'europe-west3':            'Frankfurt, Germany',

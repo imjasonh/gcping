@@ -3,6 +3,7 @@ asia-northeast1
 asia-south1
 asia-southeast1
 australia-southeast1
+europe-north1
 europe-west1
 europe-west2
 europe-west3

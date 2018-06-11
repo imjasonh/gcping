@@ -38,7 +38,7 @@ recreateNetwork() {
     --allow=tcp:80 \
     --target-tags=http-server
 
-  part=20
+  part=80
   while read r; do
     gcloud compute networks subnets create $SUBNET_NAME \
       --region=$r \
@@ -113,46 +113,46 @@ recreateLB() {
   # Create health check that hits /ping
   gcloud compute http-health-checks create http-basic-check \
     --request-path=/ping
-  
+
   # Create backend service using that health check
   gcloud compute backend-services create backend-service \
     --protocol=HTTP \
     --http-health-checks=http-basic-check \
     --global \
     --enable-cdn
-  
+
   # Create URL map to map all incoming requests to all instances
   gcloud compute url-maps create web-map \
     --default-service=backend-service
-  
+
   # Create target HTTP proxy to route requests to URL map
   gcloud compute target-http-proxies create http-lb-proxy \
     --url-map=web-map
-  
+
   # Create global forwarding rule to route requests to HTTP proxy
   gcloud compute forwarding-rules create http-content-rule \
     --address=$lb_addr \
     --global \
     --target-http-proxy=http-lb-proxy \
     --ports=80
-  
+
   while read r; do
     ig=instance-group-$r
     zone=$r-b
-  
+
     # Create instance group for each zone
     gcloud compute instance-groups unmanaged create $ig --zone=$zone
-  
+
     # Add region's VM to instance group
     gcloud compute instance-groups unmanaged add-instances $ig \
       --instances=$r \
       --zone=$zone
-  
+
     # Define HTTP service and map a named port
     gcloud compute instance-groups unmanaged set-named-ports $ig \
       --named-ports=http:80 \
       --zone=$zone
-  
+
     # Add instance groups as backends to backend service
     gcloud compute backend-services add-backend backend-service \
       --balancing-mode UTILIZATION \
@@ -162,7 +162,7 @@ recreateLB() {
       --instance-group-zone=$zone \
       --global
   done < regions.txt
-  
+
   # Ping LB IP until it gets a pong.
   while true; do
     got=$(curl http://$lb_addr/ping 2>/dev/null | grep "pong")
@@ -172,7 +172,7 @@ recreateLB() {
     fi
     sleep 10
   done
-  
+
   echo "Load balance IP:" $lb_addr
 }
 

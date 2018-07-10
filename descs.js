@@ -16,4 +16,5 @@ let _DESCS = {
   'us-east1':                'South Carolina, USA',
   'us-east4':                'Northern Virginia, USA',
   'us-west1':                'Oregon, USA',
+  'us-west2':                'Los Angeles, USA',
 };

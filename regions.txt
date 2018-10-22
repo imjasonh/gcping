@@ -1,4 +1,5 @@
 asia-east1
+asia-east2
 asia-northeast1
 asia-south1
 asia-southeast1

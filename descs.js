@@ -1,5 +1,6 @@
 let _DESCS = {
   'asia-east1':              'Taiwan',
+  'asia-east2':              'Hong Kong',
   'asia-northeast1':         'Tokyo',
   'asia-south1':             'Mumbai',
   'asia-southeast1':         'Singapore',

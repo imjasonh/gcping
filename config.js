@@ -1,3 +1,4 @@
+
 var _URLS = {
   "asia-east1": "http://104.155.201.52/ping",
   "asia-east2": "http://35.220.162.209/ping",
@@ -10,6 +11,7 @@ var _URLS = {
   "europe-west2": "http://35.189.67.146/ping",
   "europe-west3": "http://35.198.78.172/ping",
   "europe-west4": "http://35.204.93.82/ping",
+  "europe-west6": "http://34.65.3.254/ping",
   "global": "http://35.186.221.153/ping",
   "northamerica-northeast1": "http://35.203.57.164/ping",
   "southamerica-east1": "http://35.198.10.68/ping",

@@ -9,6 +9,7 @@ europe-west1
 europe-west2
 europe-west3
 europe-west4
+europe-west6
 northamerica-northeast1
 southamerica-east1
 us-central1

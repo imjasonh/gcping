@@ -10,6 +10,7 @@ let _DESCS = {
   'europe-west2':            'London, UK',
   'europe-west3':            'Frankfurt, Germany',
   'europe-west4':            'Netherlands',
+  'europe-west6':            'Zurich, Switzerland',
   'global':                  'Global HTTP Load Balancer',
   'northamerica-northeast1': 'Montreal, Canada',
   'southamerica-east1':      'São Paulo',

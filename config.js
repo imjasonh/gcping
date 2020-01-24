@@ -4,6 +4,7 @@ var _URLS = {
   "asia-east2": "http://35.220.162.209/ping",
   "asia-northeast1": "http://104.198.86.148/ping",
   "asia-northeast2": "http://34.97.196.51/ping",
+  "asia-northeast3": "http://34.64.138.27/ping",
   "asia-south1": "http://35.200.186.152/ping",
   "asia-southeast1": "http://35.185.179.198/ping",
   "australia-southeast1": "http://35.189.6.113/ping",

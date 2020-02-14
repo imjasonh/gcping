@@ -31,7 +31,7 @@ recreateNetwork() {
 
   # Create network with subnets and firewall rule..
   gcloud compute networks create $NETWORK_NAME \
-    --mode=custom \
+    --subnet-mode=custom \
     --description="Non-default network"
   gcloud compute firewall-rules create $FWR_NAME \
     --network=network \
@@ -61,30 +61,30 @@ deleteVMs() {
 
 # Create VMs in each region.
 createVMs() {
-  while read r; do
+  # Build the image.
+  image=$(KO_DOCKER_REPO=gcr.io/${CLOUDSDK_CORE_PROJECT} ko publish -B ./cmd/ping/)
+
+  while read region; do
     # b-zones just happen to exist in every region. Let's hope that doesn't
     # change...
-    zone=$r-b
+    zone=$region-b
 
-    addr=$(gcloud compute addresses describe "$r" --region=$r | grep "address:" | cut -d' ' -f2)
-    echo $r $addr
+    addr=$(gcloud compute addresses describe "$region" --region=$region | grep "address:" | cut -d' ' -f2)
+    echo $region $addr
 
-    gcloud compute instances create "$r" \
+    gcloud compute instances create-with-container "$region" \
       --zone=$zone \
       --machine-type=f1-micro \
-      --metadata-from-file startup-script=startupscript.sh \
+      --container-image=${image} \
+      --container-env=REGION=${region} \
+      --tags=http-server \
+      --address=$addr \
       --network=$NETWORK_NAME \
       --subnet=$SUBNET_NAME \
-      --address=$addr \
-      --tags=http-server \
       --maintenance-policy=MIGRATE \
-      --image-family=ubuntu-1604-lts \
-      --image-project=ubuntu-os-cloud \
       --boot-disk-size=10 \
       --boot-disk-type=pd-standard \
-      --boot-disk-device-name="$r" \
-      --no-scopes \
-      --no-service-account
+      --boot-disk-device-name="$region"
   done < regions.txt
 }
 
@@ -177,7 +177,7 @@ recreateLB() {
 }
 
 regenConfig() {
-  go run regen.go -tok=$(gcloud auth print-access-token)
+  go run cmd/regen/main.go -tok=$(gcloud auth print-access-token)
 }
 
 uploadPages() {
@@ -197,4 +197,5 @@ recreateNetwork
 createVMs
 recreateLB
 regenConfig
-uploadPages
+#uploadPages
+

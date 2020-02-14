@@ -197,5 +197,5 @@ recreateNetwork
 createVMs
 recreateLB
 regenConfig
-#uploadPages
+uploadPages
 

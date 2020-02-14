@@ -8,16 +8,21 @@ import (
 )
 
 func main() {
-	p := os.Getenv("PORT")
-	if p == "" {
-		p = "80"
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "80"
 	}
-	log.Printf("Port is %s", p)
+	log.Printf("Port is %s", port)
+
+	region := os.Getenv("REGION")
+	if region == "" {
+		region = "pong"
+	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Cache-Control", "no-store")
 		w.Header().Add("Access-Control-Allow-Origin", "*")
-		fmt.Fprintln(w, "pong")
+		fmt.Fprintln(w, region)
 	})
-	log.Fatal(http.ListenAndServe(":"+p, nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

@@ -22,4 +22,5 @@ let _DESCS = {
   'us-west1':                'Oregon, USA',
   'us-west2':                'Los Angeles, USA',
   'us-west3':                'Salt Lake City, USA',
+  'us-west4':                'Las Vegas, USA',
 };

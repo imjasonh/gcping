@@ -23,4 +23,5 @@ var _URLS = {
   "us-west1": "http://104.199.116.74/ping",
   "us-west2": "http://35.236.45.25/ping",
   "us-west3": "http://34.106.137.137/ping",
+  "us-west4": "http://34.125.96.237/ping",
 };

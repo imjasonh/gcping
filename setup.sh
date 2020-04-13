@@ -50,13 +50,7 @@ recreateNetwork() {
 
 # Delete VMs in each region.
 deleteVMs() {
-  while read r; do
-    # b-zones just happen to exist in every region. Let's hope that doesn't
-    # change...
-    zone=$r-b
-
-    gcloud -q compute instances delete "$r" --zone=$zone || true
-  done < regions.txt
+  go run cmd/delete/main.go -tok=$(gcloud auth print-access-token) || exit 1
 }
 
 # Create VMs in each region.

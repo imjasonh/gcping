@@ -1,41 +1,37 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"flag"
-	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
-	"sort"
+	"strings"
 	"time"
 
 	"golang.org/x/sync/errgroup"
+	compute "google.golang.org/api/compute/v1"
 )
 
-var (
-	project = flag.String("project", "gcping-1369", "Project to use")
-	tok     = flag.String("tok", "", "Auth token")
-)
+var project = flag.String("project", "gcping-1369", "Project to use")
 
 func main() {
 	flag.Parse()
 
-	if *tok == "" {
-		log.Fatalf("Must provide -tok")
+	svc, err := compute.NewService(context.Background())
+	if err != nil {
+		log.Fatalf("NewService: %v", err)
 	}
 
 	// List all instances globally.
-	urls, err := list()
+	instances, err := list(svc)
 	if err != nil {
 		log.Fatalf("Listing instances: %v", err)
 	}
 
 	// Delete all instances in parallel.
 	var g errgroup.Group
-	for _, u := range urls {
-		u := u
-		g.Go(func() error { return delete(u) })
+	for _, inst := range instances {
+		inst := inst
+		g.Go(func() error { return delete(svc, inst) })
 	}
 	if err := g.Wait(); err != nil {
 		log.Fatalf("Delete: %v", err)
@@ -43,69 +39,35 @@ func main() {
 
 	// Poll until all instances are deleted.
 	for {
-		urls, err := list()
+		instances, err := list(svc)
 		if err != nil {
 			log.Fatalf("Listing after delete: %v", err)
 		}
-		log.Printf("Found %d instances...", len(urls))
-		if len(urls) == 0 {
+		log.Printf("Found %d instances...", len(instances))
+		if len(instances) == 0 {
 			break
 		}
 		time.Sleep(10 * time.Second)
 	}
 }
 
-func list() ([]string, error) {
-	url := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/aggregated/instances", *project)
-	req, err := http.NewRequest("GET", url, nil)
+func list(svc *compute.Service) ([]*compute.Instance, error) {
+	resp, err := svc.Instances.AggregatedList(*project).Do()
 	if err != nil {
-		return nil, fmt.Errorf("NewRequest: %v", err)
+		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+*tok)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("GET %s: %v", url, err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		all, _ := ioutil.ReadAll(resp.Body)
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(all))
-	}
-	var response struct {
-		Items map[string]struct {
-			Instances []struct {
-				SelfLink string `json:"selfLink"`
-			} `json:"instances"`
-		} `json:"items"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, fmt.Errorf("json.Decode: %v", err)
-	}
-
-	var instances []string
-	for _, i := range response.Items {
-		for _, ii := range i.Instances {
-			instances = append(instances, ii.SelfLink)
+	var instances []*compute.Instance
+	for _, inst := range resp.Items {
+		for _, inst := range inst.Instances {
+			instances = append(instances, inst)
 		}
 	}
-	sort.Strings(instances)
 	return instances, nil
 }
 
-func delete(url string) error {
-	log.Println("Deleting", url)
-	req, err := http.NewRequest("DELETE", url, nil)
-	if err != nil {
-		return fmt.Errorf("NewRequest: %v", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+*tok)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != http.StatusOK {
-		all, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(all))
-	}
-	return nil
+func delete(svc *compute.Service, inst *compute.Instance) error {
+	zone := inst.Zone[strings.LastIndex(inst.Zone, "/")+1:]
+	log.Println("Deleting", zone, inst.Name)
+	_, err := svc.Instances.Delete(*project, zone, inst.Name).Do()
+	return err
 }

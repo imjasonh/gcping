@@ -1,22 +1,20 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"flag"
-	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"sort"
 	"strings"
 	"text/template"
+
+	compute "google.golang.org/api/compute/v1"
 )
 
 var (
 	project = flag.String("project", "gcping-1369", "Project to use")
-	tok     = flag.String("tok", "", "Auth token")
 	outFile = flag.String("out", "config.js", "Output file")
 )
 
@@ -28,10 +26,6 @@ var _URLS = {
 
 func main() {
 	flag.Parse()
-
-	if *tok == "" {
-		log.Fatalf("Must provide -tok")
-	}
 
 	of, err := os.Create(*outFile)
 	if err != nil {
@@ -51,35 +45,14 @@ func main() {
 type address struct{ Region, IP string }
 
 func addresses() ([]address, error) {
-	// Get instances and IPs.
-	url := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/aggregated/addresses", *project)
-	req, err := http.NewRequest("GET", url, nil)
+	svc, err := compute.NewService(context.Background())
+	resp, err := svc.Addresses.AggregatedList(*project).Do()
 	if err != nil {
-		return nil, fmt.Errorf("NewRequest: GET %s: %v", url, err)
-	}
-	req.Header.Set("Authorization", "Bearer "+*tok)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("GET %s: %v", url, err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		all, _ := ioutil.ReadAll(resp.Body)
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(all))
-	}
-	var response struct {
-		Items map[string]struct {
-			Addresses []struct {
-				Address string `json:"address"`
-			} `json:"addresses"`
-		} `json:"items"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, fmt.Errorf("json.Decode: %v", err)
+		return nil, err
 	}
 
 	var addresses []address
-	for reg, addrs := range response.Items {
+	for reg, addrs := range resp.Items {
 		reg = strings.TrimPrefix(reg, "regions/")
 		addresses = append(addresses, address{reg, addrs.Addresses[0].Address})
 	}

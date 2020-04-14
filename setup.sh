@@ -6,20 +6,10 @@ export CLOUDSDK_CORE_PROJECT=gcping-1369
 NETWORK_NAME=network
 SUBNET_NAME=subnet
 
-# Write list of regions to regions.txt
-listRegions() {
-  gcloud compute regions list --format="value(name)" > regions.txt
-}
-
 # Ensure a static IP address exists for each region.
+# Also write list of regions to regions.txt
 ensureAddrs() {
-  while read r; do
-    addr=$(gcloud compute addresses describe "$r" --region=$r | grep "address:" | cut -d' ' -f2)
-    if [[ -z $addr ]]; then
-      echo "No static IP address for $r, creating"
-      gcloud compute addresses create "$r" --region=$r
-    fi
-  done < regions.txt
+  go run cmd/addresses/main.go || exit 1
 }
 
 # Delete network and recreate it with subnets for each region.
@@ -50,7 +40,7 @@ recreateNetwork() {
 
 # Delete VMs in each region.
 deleteVMs() {
-  go run cmd/delete/main.go -tok=$(gcloud auth print-access-token) || exit 1
+  go run cmd/delete/main.go || exit 1
 }
 
 # Create VMs in each region.
@@ -171,7 +161,7 @@ recreateLB() {
 }
 
 regenConfig() {
-  go run cmd/regen/main.go -tok=$(gcloud auth print-access-token)
+  go run cmd/regen/main.go 
 }
 
 uploadPages() {
@@ -184,7 +174,6 @@ uploadPages() {
   gsutil web set -m index.html ${BUCKET}
 }
 
-listRegions
 ensureAddrs
 deleteVMs
 recreateNetwork

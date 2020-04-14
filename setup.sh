@@ -48,28 +48,9 @@ createVMs() {
   # Build the image.
   image=$(KO_DOCKER_REPO=gcr.io/${CLOUDSDK_CORE_PROJECT} ko publish -B ./cmd/ping/)
 
-  while read region; do
-    # b-zones just happen to exist in every region. Let's hope that doesn't
-    # change...
-    zone=$region-b
+  gcloud instances list
 
-    addr=$(gcloud compute addresses describe "$region" --region=$region | grep "address:" | cut -d' ' -f2)
-    echo $region $addr
-
-    gcloud compute instances create-with-container "$region" \
-      --zone=$zone \
-      --machine-type=f1-micro \
-      --container-image=${image} \
-      --container-env=REGION=${region} \
-      --tags=http-server \
-      --address=$addr \
-      --network=$NETWORK_NAME \
-      --subnet=$SUBNET_NAME \
-      --maintenance-policy=MIGRATE \
-      --boot-disk-size=10 \
-      --boot-disk-type=pd-standard \
-      --boot-disk-device-name="$region"
-  done < regions.txt
+  go run cmd/create/main.go -image=${image} || exit 1
 }
 
 # Delete and create the global loadbalancer with a instance group for each region. 
@@ -161,7 +142,7 @@ recreateLB() {
 }
 
 regenConfig() {
-  go run cmd/regen/main.go 
+  go run cmd/regen/main.go || exit 1
 }
 
 uploadPages() {

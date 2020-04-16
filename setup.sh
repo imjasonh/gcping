@@ -47,9 +47,6 @@ deleteVMs() {
 createVMs() {
   # Build the image.
   image=$(KO_DOCKER_REPO=gcr.io/${CLOUDSDK_CORE_PROJECT} ko publish -B ./cmd/ping/)
-
-  gcloud instances list
-
   go run cmd/create/main.go -image=${image} || exit 1
 }
 
@@ -101,32 +98,7 @@ recreateLB() {
     --target-http-proxy=http-lb-proxy \
     --ports=80
 
-  while read r; do
-    ig=instance-group-$r
-    zone=$r-b
-
-    # Create instance group for each zone
-    gcloud compute instance-groups unmanaged create $ig --zone=$zone
-
-    # Add region's VM to instance group
-    gcloud compute instance-groups unmanaged add-instances $ig \
-      --instances=$r \
-      --zone=$zone
-
-    # Define HTTP service and map a named port
-    gcloud compute instance-groups unmanaged set-named-ports $ig \
-      --named-ports=http:80 \
-      --zone=$zone
-
-    # Add instance groups as backends to backend service
-    gcloud compute backend-services add-backend backend-service \
-      --balancing-mode UTILIZATION \
-      --max-utilization 0.8 \
-      --capacity-scaler 1 \
-      --instance-group=$ig \
-      --instance-group-zone=$zone \
-      --global
-  done < regions.txt
+  go run ./cmd/lb/main.go || exit 1
 
   # Ping LB IP until it gets a pong.
   while true; do
@@ -161,5 +133,5 @@ recreateNetwork
 createVMs
 recreateLB
 regenConfig
-uploadPages
+#uploadPages
 

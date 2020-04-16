@@ -29,10 +29,6 @@ func main() {
 		log.Fatalf("NewService: %v", err)
 	}
 
-	if err := create(svc, "us-east1"); err != nil {
-		log.Fatal(err)
-	}
-
 	resp, err := svc.Regions.List(*project).Do()
 	if err != nil {
 		log.Fatalf("regions.list: %v", err)

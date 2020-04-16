@@ -4,10 +4,8 @@ import (
 	"context"
 	"flag"
 	"log"
-	"strings"
-	"time"
 
-	"golang.org/x/sync/errgroup"
+	"github.com/ImJasonH/gcping/pkg/util"
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -21,53 +19,22 @@ func main() {
 		log.Fatalf("NewService: %v", err)
 	}
 
-	// List all instances globally.
-	instances, err := list(svc)
-	if err != nil {
-		log.Fatalf("Listing instances: %v", err)
-	}
-
 	// Delete all instances in parallel.
-	var g errgroup.Group
-	for _, inst := range instances {
-		inst := inst
-		g.Go(func() error { return delete(svc, inst) })
-	}
-	if err := g.Wait(); err != nil {
-		log.Fatalf("Delete: %v", err)
-	}
-
-	// Poll until all instances are deleted.
-	for {
-		instances, err := list(svc)
-		if err != nil {
-			log.Fatalf("Listing after delete: %v", err)
-		}
-		log.Printf("Found %d instances...", len(instances))
-		if len(instances) == 0 {
-			break
-		}
-		time.Sleep(10 * time.Second)
+	if err := util.ForEachRegion(svc, *project, deleteVM); err != nil {
+		log.Fatal(err)
 	}
 }
 
-func list(svc *compute.Service) ([]*compute.Instance, error) {
-	resp, err := svc.Instances.AggregatedList(*project).Do()
+func deleteVM(svc *compute.Service, region string) error {
+	zone := region + "-b"
+	log.Println("Deleting instance:", region)
+	op, err := svc.Instances.Delete(*project, zone, region).Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	var instances []*compute.Instance
-	for _, inst := range resp.Items {
-		for _, inst := range inst.Instances {
-			instances = append(instances, inst)
-		}
+	if err := util.WaitForZoneOp(svc, *project, zone, op); err != nil {
+		return err
 	}
-	return instances, nil
-}
-
-func delete(svc *compute.Service, inst *compute.Instance) error {
-	zone := inst.Zone[strings.LastIndex(inst.Zone, "/")+1:]
-	log.Println("Deleting", zone, inst.Name)
-	_, err := svc.Instances.Delete(*project, zone, inst.Name).Do()
+	log.Printf("instances.delete (%s): ok", region)
 	return err
 }

@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"golang.org/x/sync/errgroup"
+	"github.com/ImJasonH/gcping/pkg/util"
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -29,16 +29,7 @@ func main() {
 		log.Fatalf("NewService: %v", err)
 	}
 
-	resp, err := svc.Regions.List(*project).Do()
-	if err != nil {
-		log.Fatalf("regions.list: %v", err)
-	}
-	var g errgroup.Group
-	for _, r := range resp.Items {
-		r := r.Name
-		g.Go(func() error { return create(svc, r) })
-	}
-	if err := g.Wait(); err != nil {
+	if err := util.ForEachRegion(svc, *project, create); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -28,14 +28,7 @@ recreateNetwork() {
     --allow=tcp:80 \
     --target-tags=http-server
 
-  part=22
-  while read r; do
-    gcloud compute networks subnets create $SUBNET_NAME \
-      --region=$r \
-      --network=$NETWORK_NAME \
-      --range="10.$part.0.0/20"
-    part=$((part+2))
-  done < regions.txt
+  go run ./cmd/networks/main.go || exit 1
 }
 
 # Delete VMs in each region.
@@ -57,12 +50,6 @@ recreateLB() {
   gcloud -q compute url-maps            delete web-map
   gcloud -q compute backend-services    delete backend-service --global
   gcloud -q compute http-health-checks  delete http-basic-check
-
-  while read r; do
-    ig=instance-group-$r
-    zone=$r-b
-    gcloud -q compute instance-groups unmanaged delete $ig --zone=$zone
-  done < regions.txt
 
   # Create LB.
   lb_addr=$(gcloud compute addresses describe global --global | grep "address: " | cut -d' ' -f2)

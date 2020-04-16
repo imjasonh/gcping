@@ -5,9 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 
-	"golang.org/x/sync/errgroup"
+	"github.com/ImJasonH/gcping/pkg/util"
 	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/googleapi"
 )
 
 var project = flag.String("project", "gcping-1369", "Project to use")
@@ -26,19 +28,20 @@ func main() {
 	}
 
 	// Create unmanaged IGs in each region.
-	var g errgroup.Group
-	for _, r := range resp.Items {
-		r := r.Name
-		g.Go(func() error { return create(svc, r) })
-	}
-	if err := g.Wait(); err != nil {
+	if err := util.ForEachRegion(svc, *project, createIG); err != nil {
 		log.Fatal(err)
 	}
 
+	if err := updateGlobalLB(svc, resp); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func updateGlobalLB(svc *compute.Service, resp *compute.RegionList) error {
 	// Update the global LB with all IG backends.
 	bs, err := svc.BackendServices.Get(*project, "backend-service").Do()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	for _, r := range resp.Items {
 		zone := r.Name + "-b"
@@ -52,15 +55,16 @@ func main() {
 	}
 	op, err := svc.BackendServices.Update(*project, "backend-service", bs).Do()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	if err := waitForGlobalOp(svc, op); err != nil {
-		log.Fatal(err)
+	if err := util.WaitForGlobalOp(svc, *project, op); err != nil {
+		return err
 	}
 	log.Println("backendServices.update: ok")
+	return nil
 }
 
-func create(svc *compute.Service, region string) error {
+func createIG(svc *compute.Service, region string) error {
 	log.Println("Creating LB config for", region)
 
 	// Create an (unmanaged) instance group.
@@ -69,10 +73,14 @@ func create(svc *compute.Service, region string) error {
 	op, err := svc.InstanceGroups.Insert(*project, zone, &compute.InstanceGroup{
 		Name: ig,
 	}).Do()
+	if herr, ok := err.(*googleapi.Error); ok && herr.Code == http.StatusConflict {
+		log.Printf("instanceGroups.insert (%s): already exists", region)
+		return nil
+	}
 	if err != nil {
 		return fmt.Errorf("instanceGroups.insert (%s): %v", region, err)
 	}
-	if err := waitForZoneOp(svc, zone, op); err != nil {
+	if err := util.WaitForZoneOp(svc, *project, zone, op); err != nil {
 		return fmt.Errorf("wait for instanceGroups.insert (%s): %v", region, err)
 	}
 	log.Printf("instanceGroups.insert (%s): ok", region)
@@ -86,7 +94,7 @@ func create(svc *compute.Service, region string) error {
 	if err != nil {
 		return fmt.Errorf("instanceGroups.addInstances (%s): %v", region, err)
 	}
-	if err := waitForZoneOp(svc, zone, op); err != nil {
+	if err := util.WaitForZoneOp(svc, *project, zone, op); err != nil {
 		return fmt.Errorf("wait for instanceGroups.addInstances (%s): %v", region, err)
 	}
 	log.Printf("instanceGroups.addInstances (%s): ok", region)
@@ -98,42 +106,9 @@ func create(svc *compute.Service, region string) error {
 	if err != nil {
 		return fmt.Errorf("instanceGroups.setNamedPorts (%s): %v", region, err)
 	}
-	if err := waitForZoneOp(svc, zone, op); err != nil {
+	if err := util.WaitForZoneOp(svc, *project, zone, op); err != nil {
 		return fmt.Errorf("wait for instanceGroups.setNamedPorts (%s): %v", region, err)
 	}
 	log.Printf("instanceGroups.setNamedPorts (%s): ok", region)
 	return nil
-}
-
-func waitForZoneOp(svc *compute.Service, zone string, op *compute.Operation) error {
-	var err error
-	for {
-		op, err = svc.ZoneOperations.Wait(*project, zone, op.Name).Do()
-		if err != nil {
-			return err
-		}
-		if op.Error != nil {
-			return fmt.Errorf("Operation error: %v", op.Error)
-		}
-		if op.Status == "DONE" {
-			return nil
-		}
-	}
-}
-
-func waitForGlobalOp(svc *compute.Service, op *compute.Operation) error {
-	var err error
-	for {
-		op, err = svc.GlobalOperations.Wait(*project, op.Name).Do()
-		if err != nil {
-			return err
-		}
-		if op.Error != nil {
-			return fmt.Errorf("Operation error: %v", op.Error)
-		}
-		if op.Status == "DONE" {
-			return nil
-		}
-	}
-
 }

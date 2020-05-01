@@ -3,9 +3,7 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
-	"os/exec"
 	"strings"
 
 	"github.com/ImJasonH/gcping/pkg/util"
@@ -45,21 +43,25 @@ func create(svc *compute.Service, region string) error {
 	addr := resp.Address
 	log.Printf("Address in %s: %s", region, addr)
 
-	parts := strings.Split(strings.ReplaceAll(fmt.Sprintf(`gcloud compute instances create-with-container %s
---project=%s
---zone=%s-b
+	out, err := util.TemplateExec(`gcloud compute instances create-with-container {{.region}}
+--project={{.project}}
+--zone={{.region}}-b
 --machine-type=f1-micro
---container-image=%s
---container-env=REGION=%s
+--container-image={{.image}}
+--container-env=REGION={{.region}}
 --tags=http-server
---address=%s
+--address={{.addr}}
 --network=network
 --subnet=subnet
 --maintenance-policy=MIGRATE
 --boot-disk-size=10
 --boot-disk-type=pd-standard
---boot-disk-device-name=%s`, region, *project, region, *image, region, addr, region), "\n", " "), " ")
-	out, err := exec.Command(parts[0], parts[1:]...).CombinedOutput()
+--boot-disk-device-name={{.region}}`, map[string]string{
+		"project": *project,
+		"region":  region,
+		"addr":    addr,
+		"image":   *image,
+	})
 	if err != nil {
 		log.Println(string(out))
 		if strings.Contains(string(out), "already exists") {

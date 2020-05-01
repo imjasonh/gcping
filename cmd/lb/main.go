@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/ImJasonH/gcping/pkg/util"
 	compute "google.golang.org/api/compute/v1"
@@ -53,6 +54,7 @@ func updateGlobalLB(svc *compute.Service, resp *compute.RegionList) error {
 			CapacityScaler: 1,
 		})
 	}
+	start := time.Now()
 	op, err := svc.BackendServices.Update(*project, "backend-service", bs).Do()
 	if err != nil {
 		return err
@@ -60,7 +62,7 @@ func updateGlobalLB(svc *compute.Service, resp *compute.RegionList) error {
 	if err := util.WaitForGlobalOp(svc, *project, op); err != nil {
 		return err
 	}
-	log.Println("backendServices.update: ok")
+	log.Println("backendServices.update: ok, took", time.Since(start))
 	return nil
 }
 
@@ -70,6 +72,7 @@ func createIG(svc *compute.Service, region string) error {
 	// Create an (unmanaged) instance group.
 	zone := region + "-b"
 	ig := "instance-group-" + region
+	start := time.Now()
 	op, err := svc.InstanceGroups.Insert(*project, zone, &compute.InstanceGroup{
 		Name: ig,
 	}).Do()
@@ -83,9 +86,10 @@ func createIG(svc *compute.Service, region string) error {
 	if err := util.WaitForZoneOp(svc, *project, zone, op); err != nil {
 		return fmt.Errorf("wait for instanceGroups.insert (%s): %v", region, err)
 	}
-	log.Printf("instanceGroups.insert (%s): ok", region)
+	log.Printf("instanceGroups.insert (%s): ok, took %s", region, time.Since(start))
 
 	// Add the instance to the IG.
+	start = time.Now()
 	op, err = svc.InstanceGroups.AddInstances(*project, zone, ig, &compute.InstanceGroupsAddInstancesRequest{
 		Instances: []*compute.InstanceReference{{
 			Instance: fmt.Sprintf("zones/%s/instances/%s", zone, region),
@@ -97,9 +101,10 @@ func createIG(svc *compute.Service, region string) error {
 	if err := util.WaitForZoneOp(svc, *project, zone, op); err != nil {
 		return fmt.Errorf("wait for instanceGroups.addInstances (%s): %v", region, err)
 	}
-	log.Printf("instanceGroups.addInstances (%s): ok", region)
+	log.Printf("instanceGroups.addInstances (%s): ok, took %s", region, time.Since(start))
 
 	// Set named ports.
+	start = time.Now()
 	op, err = svc.InstanceGroups.SetNamedPorts(*project, zone, ig, &compute.InstanceGroupsSetNamedPortsRequest{
 		NamedPorts: []*compute.NamedPort{{Name: "http", Port: 80}},
 	}).Do()
@@ -109,6 +114,6 @@ func createIG(svc *compute.Service, region string) error {
 	if err := util.WaitForZoneOp(svc, *project, zone, op); err != nil {
 		return fmt.Errorf("wait for instanceGroups.setNamedPorts (%s): %v", region, err)
 	}
-	log.Printf("instanceGroups.setNamedPorts (%s): ok", region)
+	log.Printf("instanceGroups.setNamedPorts (%s): ok, took %s", region, time.Since(start))
 	return nil
 }

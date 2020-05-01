@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/ImJasonH/gcping/pkg/util"
 	compute "google.golang.org/api/compute/v1"
@@ -33,10 +34,11 @@ func main() {
 func createSubnet(svc *compute.Service, region string) error {
 	part := 22
 	for i := 0; i < 40; i++ {
+		start := time.Now()
 		op, err := svc.Subnetworks.Insert(*project, region, &compute.Subnetwork{
 			Name:        "subnet",
-			Network:     "network",
-			IpCidrRange: fmt.Sprintf("10.%s.0.0/20", part),
+			Network:     fmt.Sprintf("https://compute.googleapis.com/compute/v1/projects/%s/global/networks/%s", *project, "network"),
+			IpCidrRange: fmt.Sprintf("10.%d.0.0/20", part),
 		}).Do()
 		if herr, ok := err.(*googleapi.Error); ok && herr.Code == http.StatusConflict {
 			// Already exists.
@@ -51,7 +53,7 @@ func createSubnet(svc *compute.Service, region string) error {
 		if err := util.WaitForRegionOp(svc, *project, region, op); err != nil {
 			return err
 		}
-		log.Printf("subnet.create (%s): ok", region)
+		log.Printf("subnet.create (%s): ok, took %s", region, time.Since(start))
 		break
 	}
 	return nil

@@ -271,10 +271,10 @@ function updateTable() {
     var cls = (i == top) ? 'top' : '';
     var desc = _DESCS[region] || '';
     html += '<tr class="'+cls+'"><td class="regiondesc">'+desc+'<div class="region">'+region+'</div></td>' +
-      '<td class="result" id="'+region+'"><div>'+latency+'ms</div></td></tr>';
+      '<td class="result" id="'+region+'"><div>'+latency+' ms</div></td></tr>';
 
     if (place <= 3 && region != 'global') {
-      tweet += '\n'+region+' ('+latency+'ms)';
+      tweet += '\n'+region+' ('+latency+' ms)';
     }
   }
   document.getElementsByTagName('tbody')[0].innerHTML = html;

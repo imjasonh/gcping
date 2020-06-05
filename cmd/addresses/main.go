@@ -52,27 +52,37 @@ func writeFile(regions []string) error {
 }
 
 func ensureAddrs(svc *compute.Service, regions []string) error {
+	want := map[string]struct{}{}
+	for _, r := range regions {
+		want[r] = struct{}{}
+	}
+
 	// For every region, ensure an address exists at that location.
 	resp, err := svc.Addresses.AggregatedList(*project).Do()
 	if err != nil {
 		return err
 	}
-
-	rm := map[string]struct{}{}
-	for _, r := range regions {
-		rm[r] = struct{}{}
+	have := map[string]struct{}{}
+	for r, i := range resp.Items {
+		have[strings.TrimPrefix(r, "regions/")] = struct{}{}
+		for _, a := range i.Addresses {
+			log.Printf("Address (%s): %s", r, a.Address)
+		}
 	}
 
-	for r := range resp.Items {
-		delete(rm, strings.TrimPrefix(r, "regions/"))
+	for h := range have {
+		delete(want, h)
 	}
 
-	if len(rm) == 0 {
+	for w := range want {
+		log.Println("want address for", w)
+	}
+	if len(want) == 0 {
 		return nil
 	}
 
 	var g errgroup.Group
-	for r := range rm {
+	for r := range want {
 		log.Println("missing address in region", r)
 		r := r
 		g.Go(func() error {

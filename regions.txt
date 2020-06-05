@@ -5,6 +5,7 @@ asia-northeast2
 asia-northeast3
 asia-south1
 asia-southeast1
+asia-southeast2
 australia-southeast1
 europe-north1
 europe-west1

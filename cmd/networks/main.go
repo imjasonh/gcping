@@ -32,7 +32,7 @@ func main() {
 }
 
 func createSubnet(svc *compute.Service, region string) error {
-	part := 22
+	part := 40
 	for i := 0; i < 40; i++ {
 		start := time.Now()
 		op, err := svc.Subnetworks.Insert(*project, region, &compute.Subnetwork{

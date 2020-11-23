@@ -188,7 +188,7 @@ resource "google_compute_url_map" "regions" {
 resource "google_compute_backend_service" "regions" {
   for_each = toset(var.regions)
 
-  name   = each.key
+  name       = each.key
   enable_cdn = true
   backend {
     group = google_compute_region_network_endpoint_group.regions[each.key].id
@@ -213,7 +213,11 @@ resource "google_compute_managed_ssl_certificate" "global" {
 
   name = "global"
   managed {
-    domains = ["global.${var.domain}."]
+    domains = [
+      "global.${var.domain}",
+      "www.${var.domain}",
+      var.domain,
+    ]
   }
 }
 

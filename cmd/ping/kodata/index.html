@@ -186,9 +186,23 @@ p {
         <div class="about-content mdl-cell mdl-cell--6-col mdl-cell--1-offset-tablet mdl-cell--3-offset-desktop">
           <center><a id="tweet-link" href="https://twitter.com/share" target="_blank"><img id="tweet-logo" src="twitter.png" alt="Tweet your latencies"></img></a></center>
           <h2>How does this work?</h2>
-          <p>Your browser makes HTTP requests to <code>f1-micro</code> instances in each region. The median time between request and response is shown.</p>
-          <p>The <b>global</b> row uses a <a target="_blank" href="https://cloud.google.com/load-balancing/">Global HTTP Load Balancer</a> to route requests to the nearest healthy instance.</p>
-          <p>This is not an official Google project. <a target="_blank" href="https://github.com/imjasonh/gcping">Source available on GitHub</a>.</p>
+          <p>Your browser makes HTTPS requests to
+          <a target="_blank"
+             href="https://cloud.google.com/run">Google Cloud Run</a>
+          services deployed to each region. The median time between request and
+          response is shown.</p>
+          <p>The <b>global</b> row uses a
+          <a target="_blank"
+             href="https://cloud.google.com/load-balancing/">Global HTTPS Load
+             Balancer</a> to route requests to the nearest
+          service.</p>
+          <p><b>Note:</b> This site is intended to show <i>relative</i> latency
+          to each region, and should not be used to determine the absolute
+          lowest latency possible, or your own network speed or other network
+          conditions. Results are not scientific.</p>
+          <p>This is not an official Google project.
+          <a target="_blank"
+             href="https://github.com/imjasonh/gcping">Source available on GitHub</a>.</p>
 
           <img id="pingimg"></img>
         </div>
@@ -200,9 +214,6 @@ p {
 <script type="text/javascript">
 // TODO: Show regions on a map, with lines overlayed according to ping times.
 // TODO: Add an option to contribute times and JS geolocation info to a public BigQuery dataset.
-// TODO: Re-add pings for GCS.
-// TODO: Add pings for GAE, GCF, GCR(?), etc.
-// TODO: Add pings for Cloud CDN (backed by GCE or GCS).
 
 const _MAX_RESULTS = 20; // Only consider most recent results.
 let _KEYS = [];

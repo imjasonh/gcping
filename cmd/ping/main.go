@@ -31,6 +31,7 @@ func main() {
 	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Cache-Control", "no-store")
 		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Strict-Transport-Security", "max-age=3600; includeSubdomains; preload")
 		fmt.Fprintln(w, region)
 	})
 	log.Fatal(http.ListenAndServe(":"+port, nil))

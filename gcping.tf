@@ -214,9 +214,8 @@ resource "google_compute_managed_ssl_certificate" "global" {
   name = "global"
   managed {
     domains = [
-      "global.${var.domain}",
-      "www.${var.domain}",
-      var.domain,
+      "global.${var.domain}.",
+      "${var.domain}.",
     ]
   }
 }

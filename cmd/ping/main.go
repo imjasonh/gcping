@@ -10,9 +10,9 @@ import (
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "80"
+		port = "8080"
 	}
-	log.Printf("Port is %s", port)
+	log.Printf("Serving on :%s", port)
 
 	region := os.Getenv("REGION")
 	if region == "" {

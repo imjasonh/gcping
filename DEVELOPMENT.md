@@ -10,7 +10,15 @@ Install [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
 ```
 $ terraform init
-$ terraform apply -var image=$(KO_DOCKER_REPO=gcr.io/gcping-1369 ko publish ./cmd/ping/)
+$ terraform apply -var image=$(ko publish ./cmd/ping/)
 ```
 
 This deploys the ping service to all Cloud Run regions and configures a global HTTPS Load Balancer with Google-managed SSL certificate for `global.gcping.com`.
+
+### Run locally
+
+```
+docker run -p 8080:8080 $(ko publish ./cmd/ping/)
+```
+
+And browse to http://localhost:8080/

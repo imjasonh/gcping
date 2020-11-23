@@ -196,7 +196,6 @@ p {
     </main>
   </div>
 </body>
-<script src="config.js"></script>
 <script src="descs.js"></script>
 <script type="text/javascript">
 // TODO: Show regions on a map, with lines overlayed according to ping times.
@@ -208,12 +207,10 @@ p {
 const _MAX_RESULTS = 20; // Only consider most recent results.
 let _KEYS = [];
 let idx = 0;
-let _URLS_REVERSE = {}; // reverse of _URLS
 let results = {};
-for (k in _URLS) {
-  _KEYS.push(k);
-  _URLS_REVERSE[_URLS[k]] = k;
-  results[k] = [];
+for (r in _DESCS) {
+  _KEYS.push(r);
+  results[r] = [];
 }
 
 function median(arr) {
@@ -226,7 +223,7 @@ function median(arr) {
 document.addEventListener('nextping', function() {
   let id = _KEYS[idx];
   idx = (idx+1)%_KEYS.length; // wrap around
-  let url = _URLS[id];
+  let url = "https://"+id+".gcping.com/ping";
 
   let img = document.getElementById('pingimg');
   let start = new Date().getTime();
@@ -299,22 +296,8 @@ ss.onclick = function() {
   }
 };
 
-// Pre-load an image for each URL, then start pinging with results recorded.
-// This speeds up subsequent requests. Otherwise, the first request to each IP
-// takes double the RTT because it needs to establish a connection
-let images = Object.values(_URLS);
-let image;
-let remaining = images.length;
-for (let i = 0; i < images.length; i++) {
-  image = new Image();
-  image.onerror = function () {
-    remaining--;
-    if (remaining <= 0) {
-      ss.onclick();
-    }
-  };
-  image.src = images[i];
-}
+// Start pinging.
+ss.onclick();
 </script>
 
 <script>

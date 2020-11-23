@@ -19,7 +19,16 @@ func main() {
 		region = "pong"
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// Serve / from files in kodata.
+	kdp := os.Getenv("KO_DATA_PATH")
+	if kdp == "" {
+		log.Println("KO_DATA_PATH unset")
+		kdp = "/var/run/ko/"
+	}
+	http.Handle("/", http.FileServer(http.Dir(kdp)))
+
+	// Serve /ping with region response.
+	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Cache-Control", "no-store")
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		fmt.Fprintln(w, region)

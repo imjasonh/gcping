@@ -91,8 +91,6 @@ resource "google_cloud_run_service" "regions" {
   template {
     metadata {
       annotations = {
-        "autoscaling.knative.dev/minScale" = "1"
-        "autoscaling.knative.dev/maxScale" = "10"
         "run.googleapis.com/launch-stage"  = "BETA"
       }
     }

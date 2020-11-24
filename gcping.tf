@@ -82,15 +82,10 @@ resource "google_cloud_run_service" "regions" {
   name     = each.key
   location = each.key
 
-  metadata {
-    annotations = {
-      "run.googleapis.com/launch-stage" = "BETA"
-    }
-  }
-
   template {
     metadata {
       annotations = {
+        "autoscaling.knative.dev/maxScale" = "1000"
         "run.googleapis.com/launch-stage"  = "BETA"
       }
     }
@@ -111,6 +106,14 @@ resource "google_cloud_run_service" "regions" {
   }
 
   depends_on = [google_project_service.run]
+}
+
+// Print each service URL.
+output "services" {
+  value = {
+    for svc in google_cloud_run_service.regions:
+    svc.name => svc.status[0].url
+  }
 }
 
 // Make each service invokable by all users.
@@ -134,62 +137,6 @@ resource "google_compute_region_network_endpoint_group" "regions" {
   region                = each.key
   cloud_run {
     service = google_cloud_run_service.regions[each.key].name
-  }
-}
-
-////// Regional Domain + Load Balancer config
-
-resource "google_compute_global_forwarding_rule" "regions" {
-  for_each = toset(var.regions)
-
-  name       = each.key
-  target     = google_compute_target_https_proxy.regions[each.key].id
-  port_range = "443"
-}
-
-// Print regional LB IP addresses.
-output "regions" {
-  value = {
-    for fwd in google_compute_global_forwarding_rule.regions :
-    fwd.name => fwd.ip_address
-  }
-}
-
-resource "google_compute_managed_ssl_certificate" "regions" {
-  for_each = toset(var.regions)
-  provider = google-beta
-
-  name = each.key
-  managed {
-    domains = ["${each.key}.${var.domain}."]
-  }
-}
-
-resource "google_compute_target_https_proxy" "regions" {
-  for_each = toset(var.regions)
-  provider = google-beta
-
-  name             = each.key
-  url_map          = google_compute_url_map.regions[each.key].id
-  ssl_certificates = [google_compute_managed_ssl_certificate.regions[each.key].id]
-}
-
-resource "google_compute_url_map" "regions" {
-  for_each = toset(var.regions)
-  provider = google-beta
-
-  name            = each.key
-  description     = "a description"
-  default_service = google_compute_backend_service.regions[each.key].id
-}
-
-resource "google_compute_backend_service" "regions" {
-  for_each = toset(var.regions)
-
-  name       = each.key
-  enable_cdn = true
-  backend {
-    group = google_compute_region_network_endpoint_group.regions[each.key].id
   }
 }
 

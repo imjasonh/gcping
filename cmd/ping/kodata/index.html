@@ -211,16 +211,17 @@ p {
   </div>
 </body>
 <script src="descs.js"></script>
+<script src="config.js"></script>
 <script type="text/javascript">
 // TODO: Show regions on a map, with lines overlayed according to ping times.
 // TODO: Add an option to contribute times and JS geolocation info to a public BigQuery dataset.
 
 const _MAX_RESULTS = 20; // Only consider most recent results.
-let _KEYS = [];
+let _REGIONS = [];
 let idx = 0;
 let results = {};
-for (r in _DESCS) {
-  _KEYS.push(r);
+for (r in _URLS) {
+  _REGIONS.push(r);
   results[r] = [];
 }
 
@@ -232,20 +233,20 @@ function median(arr) {
 }
 
 document.addEventListener('nextping', function() {
-  let id = _KEYS[idx];
-  idx = (idx+1)%_KEYS.length; // wrap around
-  let url = "https://"+id+".gcping.com/ping";
+  let r = _REGIONS[idx];
+  idx = (idx+1)%_REGIONS.length; // wrap around
+  let url = _URLS[r] + '/ping';
 
   let img = document.getElementById('pingimg');
   let start = new Date().getTime();
   img.onload = function() {
     let took = new Date().getTime()-start;
-    results[id].push(took);
-    if (results[id].length > _MAX_RESULTS) {
-      results[id].shift();
+    results[r].push(took);
+    if (results[r].length > _MAX_RESULTS) {
+      results[r].shift();
     }
-    let a = median(results[id]);
-    let out = document.getElementById(id+'-result');
+    let a = median(results[r]);
+    let out = document.getElementById(r+'-result');
     updateTable();
     if (!stopped) {
       document.dispatchEvent(new Event('nextping'));

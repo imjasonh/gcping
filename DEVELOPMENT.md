@@ -13,6 +13,11 @@ the GCR repository you'd like to deploy to (e.g.,
 ### Deploy using Terraform
 
 ```
+$ gcloud auth login                      # Used by ko
+$ gcloud auth application-default login  # Used by Terraform
+```
+
+```
 $ terraform init
 $ terraform apply -var image=$(ko publish ./cmd/ping/)
 ```

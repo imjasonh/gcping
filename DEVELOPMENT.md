@@ -33,3 +33,11 @@ docker run -p 8080:8080 $(KO_DOCKER_REPO=ko.local ko publish ./cmd/ping/)
 And browse to http://localhost:8080/
 
 This connects to real regional backends and the global LB backend.
+
+### Regenerate list of URLs
+
+```
+./genconfig.sh
+```
+
+This transforms Terraform output to a form usable by the JS frontend.

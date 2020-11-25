@@ -1,5 +1,5 @@
 let _URLS = {
-  "global": "https://global.gcping.com/ping",
+  "global": "https://global.gcping.com",
   "asia-east1": "https://asia-east1-bmlfzs4h6a-de.a.run.app",
   "asia-east2": "https://asia-east2-bmlfzs4h6a-df.a.run.app",
   "asia-northeast1": "https://asia-northeast1-bmlfzs4h6a-an.a.run.app",

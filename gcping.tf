@@ -111,7 +111,7 @@ resource "google_cloud_run_service" "regions" {
 // Print each service URL.
 output "services" {
   value = {
-    for svc in google_cloud_run_service.regions:
+    for svc in google_cloud_run_service.regions :
     svc.name => svc.status[0].url
   }
 }
@@ -142,15 +142,21 @@ resource "google_compute_region_network_endpoint_group" "regions" {
 
 ////// Global Domain + Load Balancer config
 
+// Reserve a global static IP address.
+resource "google_compute_global_address" "global" {
+  name = "address"
+}
+
 resource "google_compute_global_forwarding_rule" "global" {
   name       = "global"
   target     = google_compute_target_https_proxy.global.id
   port_range = "443"
+  ip_address = google_compute_global_address.global.address
 }
 
 // Print global LB IP address.
 output "global" {
-  value = google_compute_global_forwarding_rule.global.ip_address
+  value = google_compute_global_address.global.address
 }
 
 resource "google_compute_managed_ssl_certificate" "global" {
@@ -193,4 +199,28 @@ resource "google_compute_backend_service" "global" {
       group = backend.value["id"]
     }
   }
+}
+
+// Create an HTTP->HTTPS upgrade rule.
+resource "google_compute_url_map" "https_redirect" {
+  name = "https-redirect"
+
+  default_url_redirect {
+    https_redirect         = true
+    redirect_response_code = "MOVED_PERMANENTLY_DEFAULT"
+    strip_query            = false
+  }
+}
+
+resource "google_compute_target_http_proxy" "https_redirect" {
+  name    = "https-redirect"
+  url_map = google_compute_url_map.https_redirect.id
+}
+
+resource "google_compute_global_forwarding_rule" "https_redirect" {
+  name = "https-redirect"
+
+  target     = google_compute_target_http_proxy.https_redirect.id
+  port_range = "80"
+  ip_address = google_compute_global_address.global.address
 }

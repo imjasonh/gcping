@@ -1,3 +1,7 @@
+// NOTE: Please do not depend on the values in this file, as they
+// may change without warning. Instead, use the process in
+// DEVELOPMENT.md to create your own regional Cloud Run services
+// and use those instead.
 let _URLS = {
   "global": "https://global.gcping.com",
   "asia-east1": "https://asia-east1-bmlfzs4h6a-de.a.run.app",

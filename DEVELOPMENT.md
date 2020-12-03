@@ -19,7 +19,7 @@ $ gcloud auth application-default login  # Used by Terraform
 
 ```
 $ terraform init
-$ terraform apply -var image=$(ko publish ./cmd/ping/)
+$ terraform apply -var image=$(ko publish -P ./cmd/ping/)
 ```
 
 This deploys the ping service to all Cloud Run regions and configures a global HTTPS Load Balancer with Google-managed SSL certificate for `global.gcping.com`.
@@ -27,7 +27,7 @@ This deploys the ping service to all Cloud Run regions and configures a global H
 ### Run frontend locally
 
 ```
-docker run -p 8080:8080 $(KO_DOCKER_REPO=ko.local ko publish ./cmd/ping/)
+docker run -p 8080:8080 $(KO_DOCKER_REPO=ko.local ko publish -P ./cmd/ping/)
 ```
 
 And browse to http://localhost:8080/

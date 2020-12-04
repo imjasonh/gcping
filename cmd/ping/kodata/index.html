@@ -76,11 +76,6 @@ a, a:visited {
   text-decoration: none;
 }
 
-#pingimg {
-  display: none;
-  visibility: hidden;
-}
-
 .ribbon {
   background-color: #283238;
   left: 0;
@@ -203,8 +198,6 @@ p {
           <p>This is not an official Google project.
           <a target="_blank"
              href="https://github.com/imjasonh/gcping">Source available on GitHub</a>.</p>
-
-          <img id="pingimg"></img>
         </div>
       </div>
     </main>
@@ -232,14 +225,23 @@ function median(arr) {
   return copy[Math.floor(copy.length/2)];
 }
 
+let globalGot = '';
 document.addEventListener('nextping', function() {
   let r = _REGIONS[idx];
   idx = (idx+1)%_REGIONS.length; // wrap around
   let url = _URLS[r] + '/ping';
 
-  let img = document.getElementById('pingimg');
   let start = new Date().getTime();
-  img.onload = function() {
+  fetch(url).then((value) => {
+    if (!value.ok) {
+      console.log('fetch', value.url, value.ok, value.status);
+    }
+    value.text().then((resp) => {
+      if (r == 'global') {
+        console.log('global got', resp);
+        globalGot = resp.trim();
+      }
+    });
     let took = new Date().getTime()-start;
     results[r].push(took);
     if (results[r].length > _MAX_RESULTS) {
@@ -251,9 +253,7 @@ document.addEventListener('nextping', function() {
     if (!stopped) {
       document.dispatchEvent(new Event('nextping'));
     }
-  };
-  img.onerror = img.onload;
-  img.src = url;
+  });
 });
 
 function updateTable() {
@@ -277,9 +277,11 @@ function updateTable() {
     if (latency == 0) { continue; }
     if (i == 0 && region === 'global') { top++; }
     if (region != 'global') { place++; }
+    let regionsub = region;
+    if (region == 'global' && results[globalGot]) { regionsub = '<i>→'+globalGot+'</i>'; }
     var cls = (i == top) ? 'top' : '';
     var desc = _DESCS[region] || '';
-    html += '<tr class="'+cls+'"><td class="regiondesc">'+desc+'<div class="region">'+region+'</div></td>' +
+    html += '<tr class="'+cls+'"><td class="regiondesc">'+desc+'<div class="region">'+regionsub+'</div></td>' +
       '<td class="result" id="'+region+'"><div>'+latency+' ms</div></td></tr>';
 
     if (place <= 3 && region != 'global') {

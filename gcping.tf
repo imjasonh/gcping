@@ -30,7 +30,7 @@ variable "image" {
 
 variable "project" {
   type    = string
-  default = "gcping-1369"
+  default = "gcping"
 }
 
 variable "domain" {
@@ -74,6 +74,11 @@ variable "regions" {
 // Enable Cloud Run API.
 resource "google_project_service" "run" {
   service = "run.googleapis.com"
+}
+
+// Enable Compute Engine API.
+resource "google_project_service" "compute" {
+  service = "compute.googleapis.com"
 }
 
 // Deploy image to each region.
@@ -138,6 +143,8 @@ resource "google_compute_region_network_endpoint_group" "regions" {
   cloud_run {
     service = google_cloud_run_service.regions[each.key].name
   }
+
+  depends_on = [google_project_service.compute]
 }
 
 ////// Global Domain + Load Balancer config

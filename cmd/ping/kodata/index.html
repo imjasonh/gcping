@@ -242,14 +242,18 @@ document.addEventListener('nextping', function() {
         globalGot = resp.trim();
       }
     });
-    let took = new Date().getTime()-start;
-    results[r].push(took);
-    if (results[r].length > _MAX_RESULTS) {
-      results[r].shift();
+    if (value.headers['X-First-Request'] == 'true') {
+      console.log('Discarding first request for', url);
+    } else {
+      let took = new Date().getTime()-start;
+      results[r].push(took);
+      if (results[r].length > _MAX_RESULTS) {
+        results[r].shift();
+      }
+      let a = median(results[r]);
+      let out = document.getElementById(r+'-result');
+      updateTable();
     }
-    let a = median(results[r]);
-    let out = document.getElementById(r+'-result');
-    updateTable();
     if (!stopped) {
       document.dispatchEvent(new Event('nextping'));
     }

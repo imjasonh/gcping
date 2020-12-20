@@ -5,7 +5,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 )
+
+var once sync.Once
 
 func main() {
 	port := os.Getenv("PORT")
@@ -32,6 +35,9 @@ func main() {
 		w.Header().Add("Cache-Control", "no-store")
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.Header().Add("Strict-Transport-Security", "max-age=3600; includeSubdomains; preload")
+		once.Do(func() {
+			w.Header().Add("X-First-Request", "true")
+		})
 		fmt.Fprintln(w, region)
 	})
 	log.Fatal(http.ListenAndServe(":"+port, nil))

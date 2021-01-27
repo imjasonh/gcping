@@ -4,12 +4,12 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "3.52.0"
+      version = "3.54.0"
     }
 
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = "3.52.0"
+      version = "3.54.0"
     }
   }
 }
@@ -40,33 +40,7 @@ variable "domain" {
 
 // TODO: generate this
 // https://github.com/hashicorp/terraform-provider-google/issues/7850
-variable "regions" {
-  type        = list(string)
-  description = "deploy to regions"
-
-  default = [
-    "asia-east1",
-    "asia-east2",
-    "asia-northeast1",
-    "asia-northeast2",
-    "asia-northeast3",
-    "asia-south1",
-    "asia-southeast1",
-    "asia-southeast2",
-    "australia-southeast1",
-    "europe-north1",
-    "europe-west1",
-    "europe-west2",
-    "europe-west3",
-    "europe-west4",
-    "europe-west6",
-    "northamerica-northeast1",
-    "southamerica-east1",
-    "us-central1",
-    "us-east1",
-    "us-east4",
-    "us-west1"
-  ]
+data "google_cloud_run_locations" "available" {
 }
 
 ////// Cloud Run
@@ -83,7 +57,7 @@ resource "google_project_service" "compute" {
 
 // Deploy image to each region.
 resource "google_cloud_run_service" "regions" {
-  for_each = toset(var.regions)
+  for_each = toset(data.google_cloud_run_locations.available.locations)
   name     = each.key
   location = each.key
 
@@ -123,7 +97,7 @@ output "services" {
 
 // Make each service invokable by all users.
 resource "google_cloud_run_service_iam_member" "allUsers" {
-  for_each = toset(var.regions)
+  for_each = toset(data.google_cloud_run_locations.available.locations)
 
   service  = google_cloud_run_service.regions[each.key].name
   location = each.key
@@ -135,7 +109,7 @@ resource "google_cloud_run_service_iam_member" "allUsers" {
 
 // Create a regional network endpoint group (NEG) for each regional Cloud Run service.
 resource "google_compute_region_network_endpoint_group" "regions" {
-  for_each = toset(var.regions)
+  for_each = toset(data.google_cloud_run_locations.available.locations)
 
   name                  = each.key
   network_endpoint_type = "SERVERLESS"

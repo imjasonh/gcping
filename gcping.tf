@@ -38,8 +38,6 @@ variable "domain" {
   default = "gcping.com"
 }
 
-// TODO: generate this
-// https://github.com/hashicorp/terraform-provider-google/issues/7850
 data "google_cloud_run_locations" "available" {
 }
 
@@ -66,6 +64,7 @@ resource "google_cloud_run_service" "regions" {
       annotations = {
         "autoscaling.knative.dev/maxScale" = "3" // Control costs.
         "run.googleapis.com/launch-stage"  = "BETA"
+        "run.googleapis.com/sandbox"       = "gvisor"
       }
     }
     spec {

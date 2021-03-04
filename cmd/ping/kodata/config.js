@@ -25,4 +25,7 @@ let _URLS = {
   "us-east1": "https://us-east1-ezn5kimndq-ue.a.run.app",
   "us-east4": "https://us-east4-ezn5kimndq-uk.a.run.app",
   "us-west1": "https://us-west1-ezn5kimndq-uw.a.run.app",
+  "us-west2": "https://us-west2-ezn5kimndq-wl.a.run.app",
+  "us-west3": "https://us-west3-ezn5kimndq-wm.a.run.app",
+  "us-west4": "https://us-west4-ezn5kimndq-wn.a.run.app",
 };

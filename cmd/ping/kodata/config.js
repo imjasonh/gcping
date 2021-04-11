@@ -13,6 +13,7 @@ let _URLS = {
   "asia-southeast1": "https://asia-southeast1-ezn5kimndq-as.a.run.app",
   "asia-southeast2": "https://asia-southeast2-ezn5kimndq-et.a.run.app",
   "australia-southeast1": "https://australia-southeast1-ezn5kimndq-ts.a.run.app",
+  "europe-central2": "https://europe-central2-ezn5kimndq-lm.a.run.app",
   "europe-north1": "https://europe-north1-ezn5kimndq-lz.a.run.app",
   "europe-west1": "https://europe-west1-ezn5kimndq-ew.a.run.app",
   "europe-west2": "https://europe-west2-ezn5kimndq-nw.a.run.app",
